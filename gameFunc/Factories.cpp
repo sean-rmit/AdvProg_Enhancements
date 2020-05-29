@@ -3,16 +3,29 @@
 #include <string>
 #include <exception>
 
-Factories::Factories() {
-    factories = new factoryPtr[FACTORIES_NUM];
-    for (int i = 0; i < FACTORIES_NUM; i++)
+Factories::Factories(int numPlayers) {
+    if (numPlayers == 2) {
+        factoriesNum == FACTORIES_NUM_TWO_PLAYERS;
+    }
+    else if (numPlayers == 3) {
+        factoriesNum == FACTORIES_NUM_THREE_PLAYERS;
+    }
+    else if (numPlayers == 4) {
+        factoriesNum == FACTORIES_NUM_FOUR_PLAYERS;
+    }
+    else {
+        std::cout << "Invalid number of players" << std::endl;
+    }
+
+    factories = new factoryPtr[factoriesNum];
+    for (int i = 0; i < factoriesNum; i++)
     {
         Factory *factory = new Factory();
         factories[i] = factory;
     }
 }
 Factories::~Factories() {
-    for (int i = 0; i < FACTORIES_NUM; i++)
+    for (int i = 0; i < factoriesNum; i++)
     {
         delete factories[i];
     }
@@ -23,10 +36,14 @@ Factories::Factories(Factories& other) {
 
 }
 
+int Factories::getFactoriesNum() {
+    return factoriesNum;
+}
+
 factoryPtr Factories::getFactory(int index) {
     try
     {
-        if (index < 0 || index > FACTORIES_NUM-1)
+        if (index < 0 || index > factoriesNum-1)
         {
             throw "Out of Bounds Exception!";
         }

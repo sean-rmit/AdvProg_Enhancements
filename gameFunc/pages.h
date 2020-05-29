@@ -14,7 +14,7 @@ void mainMenuPage(int seed);
 void creditsPage();
 
 // Displays empty board for a new name
-void newGamePage(int seed);
+void newGamePage(int playersNum, int seed);
 
 // Asks file to be loaded then displays the loaded board
 void loadGamePage(int seed);

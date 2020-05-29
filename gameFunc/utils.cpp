@@ -16,7 +16,7 @@ void printFactories(Centre *centre, Factories *factories)
 {
     std::cout << "Factories:" << std::endl;
     std::cout << "0: " << centre->getTilesAsString() << std::endl;
-    for (int i = 0; i < FACTORIES_NUM; i++)
+    for (int i = 0; i < factories->getFactoriesNum(); i++)
     {
         std::cout << i + 1 << ": " << factories->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
     }
@@ -40,8 +40,9 @@ void printPlayerMosaic(Player *player)
     std::cout << "6: broken: " << player->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
 }
 
-void printPlayerPoints(Player *player1, Player *player2)
+void printPlayerPoints(Players *players)
 {
-    std::cout << player1->getPlayerName() << "'s score: " << player1->getPlayerScore() << std::endl;
-    std::cout << player2->getPlayerName() << "'s score: " << player2->getPlayerScore() << std::endl;
+    for (int i = 0; i < players->getPlayersNum(); i++) {
+        std::cout << players->getPlayer(i)->getPlayerName() << "'s score: " << players->getPlayer(i)->getPlayerScore() << std::endl;
+    }
 }

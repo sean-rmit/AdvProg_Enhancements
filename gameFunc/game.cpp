@@ -6,12 +6,11 @@
 #include <sstream>
 #include <cstring>
 
-Game::Game(std::string playerName1, std::string playerName2, int seed)
+Game::Game(int playersNum, int seed)
 {
-    factories = new Factories();
+    factories = new Factories(playersNum);
     centre = new Centre;
-    player1 = new Player(playerName1);
-    player2 = new Player(playerName2);
+    players = new Players(playersNum);
     lid = new Lid();
     bag = new Bag();
 }
@@ -19,8 +18,7 @@ Game::~Game()
 {
     delete factories;
     delete centre;
-    delete player1;
-    delete player2;
+    delete players;
     delete lid;
     delete bag;
 }
@@ -31,13 +29,14 @@ Game::Game(Game &other)
 
 void Game::finaliseRound()
 {
-    player1->addPenaltyPoints();
-    player2->addPenaltyPoints();
-    player1->moveTilesFromPatternLineToWall(lid);
-    player1->moveTilesFromBrokenTilesToLid(lid, centre);
-    player2->moveTilesFromPatternLineToWall(lid);
-    player2->moveTilesFromBrokenTilesToLid(lid, centre);
-    if (centre->size() == 0) {
+    for (int i = 0; i < players->getPlayersNum(); i++)
+    {
+        players->getPlayer(i)->addPenaltyPoints();
+        players->getPlayer(i)->moveTilesFromPatternLineToWall(lid);
+        players->getPlayer(i)->moveTilesFromBrokenTilesToLid(lid, centre);
+    }
+    if (centre->size() == 0)
+    {
         centre->addTile(FIRSTPLAYER);
     }
 }
@@ -53,7 +52,7 @@ void Game::prepareNewRound()
             bag->addTileToBack(lid->removeTileFront());
         }
     }
-    for (int i = 0; i < FACTORIES_NUM; i++)
+    for (int i = 0; i < factories->getFactoriesNum(); i++)
     {
         factories->getFactory(i)->loadFactory(bag);
     }
@@ -87,8 +86,8 @@ bool Game::playerMakesMove(int playerNum)
     }
 
     // validate factoryNum
-    // FACTORIES_NUM + 1 because centre is included
-    if (factoryNum < 0 || factoryNum >= FACTORIES_NUM + 1)
+    // factories->getFactoriesNum() + 1 because centre is included
+    if (factoryNum < 0 || factoryNum >= factories->getFactoriesNum() + 1)
     {
         std::cout << "Invalid factoryNum!" << std::endl;
         return false;
@@ -115,25 +114,11 @@ bool Game::playerMakesMove(int playerNum)
         // patternlineIndex = 6 is broken line
         if (patternlineIndex == 6)
         {
-            if (playerNum == 1)
-            {
-                validMove = player1->takeTilesFromCentreToBrokenLine(centre, tileColour, lid);
-            }
-            else if (playerNum == 2)
-            {
-                validMove = player2->takeTilesFromCentreToBrokenLine(centre, tileColour, lid);
-            }
+            validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(centre, tileColour, lid);
         }
         else
         {
-            if (playerNum == 1)
-            {
-                validMove = player1->takeTilesFromCentre(tileColour, centre, patternlineIndex - 1, lid);
-            }
-            else if (playerNum == 2)
-            {
-                validMove = player2->takeTilesFromCentre(tileColour, centre, patternlineIndex - 1, lid);
-            }
+            validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, centre, patternlineIndex - 1, lid);
         }
         return validMove;
     }
@@ -142,25 +127,11 @@ bool Game::playerMakesMove(int playerNum)
         // patternlineIndex = 6 is broken line
         if (patternlineIndex == 6)
         {
-            if (playerNum == 1)
-            {
-                validMove = player1->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 1), tileColour, centre, lid);
-            }
-            else if (playerNum == 2)
-            {
-                validMove = player2->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 1), tileColour, centre, lid);
-            }
+            validMove = players->getPlayer(playerNum)->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 1), tileColour, centre, lid);
         }
         else
         {
-            if (playerNum == 1)
-            {
-                validMove = player1->takeTilesFromFactory(factories->getFactory(factoryNum - 1), tileColour, centre, patternlineIndex - 1, lid);
-            }
-            else if (playerNum == 2)
-            {
-                validMove = player2->takeTilesFromFactory(factories->getFactory(factoryNum - 1), tileColour, centre, patternlineIndex - 1, lid);
-            }
+            validMove = players->getPlayer(playerNum)->takeTilesFromFactory(factories->getFactory(factoryNum - 1), tileColour, centre, patternlineIndex - 1, lid);
         }
         return validMove;
     }
@@ -177,7 +148,7 @@ bool Game::hasRoundEnded()
         isEverythingEmpty = false;
     }
     // check if each factory is empty
-    for (int i = 0; i < FACTORIES_NUM; i++)
+    for (int i = 0; i < factories->getFactoriesNum(); i++)
     {
         if (factories->getFactory(i)->getLine()->getTilesNumber() != 0)
         {
@@ -191,13 +162,12 @@ bool Game::hasGameEnded()
 {
     for (int i = 0; i < WALL_LINES_NUM; i++)
     {
-        if (player1->getPlayerMosaic()->getPlayerWall()->getLine(i)->isFull())
+        for (int j = 0; j < players->getPlayersNum(); j++)
         {
-            return true;
-        }
-        if (player2->getPlayerMosaic()->getPlayerWall()->getLine(i)->isFull())
-        {
-            return true;
+            if (players->getPlayer(j)->getPlayerMosaic()->getPlayerWall()->getLine(i)->isFull())
+            {
+                return true;
+            }
         }
     }
     return false;
@@ -205,42 +175,27 @@ bool Game::hasGameEnded()
 
 void Game::finaliseGame()
 {
-    player1->addEndGameBonusPoints();
-    player2->addEndGameBonusPoints();
+    for (int i = 0; i < players->getPlayersNum(); i++)
+    {
+        players->getPlayer(i)->addEndGameBonusPoints();
+    }
     std::cout << "Game has ended: " << std::endl;
-    std::cout << player1->getPlayerName() << "'s score: " << player1->getPlayerScore() << std::endl;
-    std::cout << player2->getPlayerName() << "'s score: " << player2->getPlayerScore() << std::endl;
+    for (int i = 0; i < players->getPlayersNum(); i++)
+    {
+        std::cout << players->getPlayer(i)->getPlayerName() << "'s score: " << players->getPlayer(i)->getPlayerScore() << std::endl;
+    }
 
-    if (player1->getPlayerScore() > player2->getPlayerScore())
+    // TODO: tie feature
+    int playerWithHighestScore = 0;
+    int highestScore = 0;
+    for (int i = 0; i < players->getPlayersNum(); i++)
     {
-        std::cout << player1->getPlayerName() << " wins the game!" << std::endl;
+        if (players->getPlayer(i)->getPlayerScore() > highestScore) {
+            highestScore = players->getPlayer(i)->getPlayerScore();
+            playerWithHighestScore = i;
+        }
     }
-    else if (player1->getPlayerScore() < player2->getPlayerScore())
-    {
-        std::cout << player2->getPlayerName() << " wins the game!" << std::endl;
-    }
-    else {
-        std::cout << "It's a tie!" << std::endl;
-    }
-}
-
-void Game::finaliseLoadedGame()
-{
-    std::cout << "Game has ended: " << std::endl;
-    std::cout << player1->getPlayerName() << "'s score: " << player1->getPlayerScore() << std::endl;
-    std::cout << player2->getPlayerName() << "'s score: " << player2->getPlayerScore() << std::endl;
-
-    if (player1->getPlayerScore() > player2->getPlayerScore())
-    {
-        std::cout << player1->getPlayerName() << " wins the game!" << std::endl;
-    }
-    else if (player1->getPlayerScore() < player2->getPlayerScore())
-    {
-        std::cout << player2->getPlayerName() << " wins the game!" << std::endl;
-    }
-    else {
-        std::cout << "It's a tie!" << std::endl;
-    }
+    std::cout << players->getPlayer(playerWithHighestScore)->getPlayerName() << " wins the game!" << std::endl;
 }
 
 // getters and setters
@@ -254,14 +209,13 @@ centrePtr Game::getCentre()
     return this->centre;
 }
 
-playerPtr Game::getPlayer1()
-{
-    return this->player1;
+playersPtr Game::getPlayers() {
+    return this->players;
 }
 
-playerPtr Game::getPlayer2()
+playerPtr Game::getPlayer(int index)
 {
-    return this->player2;
+    return this->players->getPlayer(index);
 }
 
 lidPtr Game::getLid()

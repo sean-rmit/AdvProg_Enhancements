@@ -5,9 +5,8 @@ Player::Player()
 {
 }
 
-Player::Player(std::string name)
+Player::Player()
 {
-    this->playerName = name;
     this->playerScore = 0;
     playerMosaic = new Mosaic();
 }
@@ -24,7 +23,7 @@ std::string Player::getPlayerName()
 
 void Player::setPlayerName(std::string name)
 {
-    playerName = name;
+    this->playerName = name;
 }
 
 mosaicPtr Player::getPlayerMosaic()

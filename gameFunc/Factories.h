@@ -3,13 +3,15 @@
 
 #include "Factory.h"
 
-#define FACTORIES_NUM 5
+#define FACTORIES_NUM_TWO_PLAYERS 5
+#define FACTORIES_NUM_THREE_PLAYERS 7
+#define FACTORIES_NUM_FOUR_PLAYERS 9
 
 class Factories {
 public:
 
     // Constructor
-    Factories();
+    Factories(int numPlayers);
     // Deconstructor
     ~Factories();
 
@@ -18,8 +20,11 @@ public:
     // get factory object at given index
     factoryPtr getFactory(int index);
 
+    int getFactoriesNum();
+
 private:
     factoryPtr *factories;
+    int factoriesNum;
 };
 
 typedef Factories* factoriesPtr;
