@@ -3,10 +3,6 @@
 
 Player::Player()
 {
-}
-
-Player::Player()
-{
     this->playerScore = 0;
     playerMosaic = new Mosaic();
 }
@@ -215,7 +211,8 @@ bool Player::takeTilesFromCentre(char colour, Centre *centre, int patternLineInd
     }
     // only take the Firstplayer token if at least one coloured tile was taken from the centre,
     // else it was a invalid move and player should repeat his turn again
-    if (tilesTaken && centre->size() > 0 && centre->getTileColour(0) == FIRSTPLAYER)
+    // also does not take the Firstplayer token if the player's brokenline is full
+    if (tilesTaken && !playerMosaic->getPlayerBrokenTiles()->getLine()->isFull() && centre->size() > 0 && centre->getTileColour(0) == FIRSTPLAYER)
     {
         // check if the player's broken tiles is full
         if (!playerMosaic->getPlayerBrokenTiles()->getLine()->isFull())
@@ -335,7 +332,8 @@ bool Player::takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *l
     }
     // only take the Firstplayer token if at least one coloured tile was taken from the centre,
     // else it was a invalid move and player should repeat his turn again
-    if (tilesTaken && centre->size() > 0 && centre->getTileColour(0) == FIRSTPLAYER)
+    // Firstplayer token also does not get taken if the player's brokenline is full
+    if (tilesTaken && !playerMosaic->getPlayerBrokenTiles()->getLine()->isFull() && centre->size() > 0 && centre->getTileColour(0) == FIRSTPLAYER)
     {
         // check if the player's broken tiles is full
         if (!playerMosaic->getPlayerBrokenTiles()->getLine()->isFull())
@@ -361,9 +359,9 @@ void Player::moveTilesFromPatternLineToWall(Lid *lid)
     }
 }
 
-void Player::moveTilesFromBrokenTilesToLid(Lid *lid, Centre *centre)
+void Player::moveTilesFromBrokenTilesToLid(Lid *lid)
 {
-    playerMosaic->getPlayerBrokenTiles()->moveAllTilesToLid(lid, centre);
+    playerMosaic->getPlayerBrokenTiles()->moveAllTilesToLid(lid);
 }
 
 void Player::addPenaltyPoints()

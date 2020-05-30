@@ -1,5 +1,6 @@
 #include <fstream>
 #include <iostream>
+#include <string>
 #include "LoadSaveFile.h"
 
 LoadSave::LoadSave()
@@ -14,9 +15,15 @@ LoadSave::LoadSave(LoadSave &other)
 {
 }
 
-void LoadSave::saveFile(std::string saveFile, Player *player1, Player *player2, Centre *centre, Factories *factories, Bag *bag, Lid *lid, int currentPlayer)
+void LoadSave::saveFile(std::string saveFile, Players *players, Factories *factories, Bag *bag, Lid *lid, int currentPlayer)
 {
     std::ofstream saveToFile(saveFile);
+
+    // Number of players
+    saveToFile << "NUMBER_OF_PLAYERS=" << players->getPlayersNum() << std::endl;
+
+    // Number of centres
+    saveToFile << "NUMBER_OF_CENTRES=" << factories->getCentresNum() << std::endl;
 
     // Bag
     saveToFile << "BAG=" << bag->getTilesAsString() << std::endl;
@@ -25,45 +32,38 @@ void LoadSave::saveFile(std::string saveFile, Player *player1, Player *player2, 
     saveToFile << "LID=" << lid->getTilesAsString() << std::endl;
 
     // Factory Details
-    saveToFile << "FACTORY_CENTRE=" << centre->getTilesAsString() << std::endl;
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < factories->getCentresNum(); i++)
+    {
+        saveToFile << "FACTORY_CENTRE_" << i << "=" << factories->getCentre(i)->getTilesAsString() << std::endl;
+    }
+    for (int i = 0; i < factories->getFactoriesNum(); i++)
     {
         saveToFile << "FACTORY_" << i << "=" << factories->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
     }
 
-    // Player 1 Details
-    saveToFile << "PLAYER_1_NAME=" << player1->getPlayerName() << std::endl;
-    saveToFile << "PLAYER_1_SCORE=" << player1->getPlayerScore() << std::endl;
-    for (int i = 0; i < 5; i++)
+    // Players Details
+    for (int playerNum = 0; playerNum < players->getPlayersNum(); playerNum++)
     {
-        saveToFile << "PLAYER_1_PATTERN_LINE" << i << "=" << player1->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
-    }
-    saveToFile << "PLAYER_1_FLOOR_LINE=" << player1->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
-    for (int i = 0; i < 5; i++)
-    {
-        saveToFile << "PLAYER_1_MOSAIC_" << i << "=" << player1->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
-    }
-
-    // Player 2 Details
-    saveToFile << "PLAYER_2_NAME=" << player2->getPlayerName() << std::endl;
-    saveToFile << "PLAYER_2_SCORE=" << player2->getPlayerScore() << std::endl;
-    for (int i = 0; i < 5; i++)
-    {
-        saveToFile << "PLAYER_2_PATTERN_LINE" << i << "=" << player2->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
-    }
-    saveToFile << "PLAYER_2_FLOOR_LINE=" << player2->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
-    for (int i = 0; i < 5; i++)
-    {
-        saveToFile << "PLAYER_2_MOSAIC_" << i << "=" << player2->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+        saveToFile << "PLAYER_" << playerNum + 1 << "_NAME=" << players->getPlayer(playerNum)->getPlayerName() << std::endl;
+        saveToFile << "PLAYER_" << playerNum + 1 << "_SCORE=" << players->getPlayer(playerNum)->getPlayerScore() << std::endl;
+        for (int i = 0; i < 5; i++)
+        {
+            saveToFile << "PLAYER_" << playerNum + 1 << "_PATTERN_LINE" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
+        }
+        saveToFile << "PLAYER_" << playerNum + 1 << "_FLOOR_LINE=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
+        for (int i = 0; i < 5; i++)
+        {
+            saveToFile << "PLAYER_" << playerNum + 1 << "_MOSAIC_" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+        }
     }
 
-    // Current Player
-    // odd = player 1 turn, even = player 2 turn
-    saveToFile << "CURRENT_PLAYER=" << currentPlayer << std::endl;
+    // Current Player to make a move
+    saveToFile << "CURRENT_PLAYER=" << currentPlayer % players->getPlayersNum() << std::endl;
 }
 
-void LoadSave::loadFile(std::string loadFile, Player *player1, Player *player2, Centre *centre, Factories *factories, Bag *bag, Lid *lid, int &currentPlayer)
+gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
 {
+    Game *game = new Game();
     bool found = false;
     while (found == false)
     {
@@ -92,6 +92,37 @@ void LoadSave::loadFile(std::string loadFile, Player *player1, Player *player2, 
     {
         std::string data;
         int k, dl;
+        int playersNum = 0;
+        int centresNum = 0;
+
+        // number of players
+        if (line.find("NUMBER_OF_PLAYERS") != std::string::npos)
+        {
+            getData(line, data);
+
+            // Splitting data into individual characters
+            dl = data.length();
+            for (k = 0; k < dl; k++)
+            {
+                playersNum = (int)data[k];
+            }
+        }
+
+        // number of centres
+        if (line.find("NUMBER_OF_CENTRES") != std::string::npos)
+        {
+            getData(line, data);
+
+            // Splitting data into individual characters
+            dl = data.length();
+            for (k = 0; k < dl; k++)
+            {
+                centresNum = (int)data[k];
+            }
+        }
+
+        // instantiate game object
+        game = new Game(playersNum, centresNum, 0);
 
         /* FACTORIES */
         // Finding keyword line
@@ -103,7 +134,7 @@ void LoadSave::loadFile(std::string loadFile, Player *player1, Player *player2, 
             dl = data.length();
             for (k = 0; k < dl; k++)
             {
-                bag->addTileToBack(data[k]);
+                game->getBag()->addTileToBack(data[k]);
             }
         }
 
@@ -114,30 +145,35 @@ void LoadSave::loadFile(std::string loadFile, Player *player1, Player *player2, 
             dl = data.length();
             for (k = 0; k < dl; k++)
             {
-                lid->addTileToBack(data[k]);
+                game->getLid()->addTileToBack(data[k]);
             }
         }
-
-        if (line.find("FACTORY_CENTRE") != std::string::npos)
+        for (int i = 0; i < game->getFactories()->getCentresNum(); i++)
         {
-            getData(line, data);
-
-            dl = data.length();
-            for (k = 0; k < dl; k++)
+            std::string factory = "FACTORY_CENTRE_";
+            factory += std::to_string(i);
+            if (line.find(factory) != std::string::npos)
             {
-                if (data[k] != 'F')
+                getData(line, data);
+
+                dl = data.length();
+                for (k = 0; k < dl; k++)
                 {
-                    char d = data[k];
-                    centre->addTile(d);
-                }
-                else if (data[k] == 'F')
-                {
-                    centre->addTile(FIRSTPLAYER);
+                    char tile = data[k];
+                    if (tile != 'F')
+                    {
+                        
+                        game->getFactories()->getCentre(i)->addTile(tile);
+                    }
+                    else if (tile == 'F')
+                    {
+                        game->getFactories()->getCentre(i)->addTile(FIRSTPLAYER);
+                    }
                 }
             }
         }
 
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < game->getFactories()->getFactoriesNum(); i++)
         {
             std::string factory = "FACTORY_";
             factory += std::to_string(i);
@@ -148,146 +184,80 @@ void LoadSave::loadFile(std::string loadFile, Player *player1, Player *player2, 
                 dl = data.length();
                 for (k = 0; k < dl; k++)
                 {
-                    factories->getFactory(i)->getLine()->addTileToBack(data[k]);
+                    game->getFactories()->getFactory(i)->getLine()->addTileToBack(data[k]);
                 }
             }
         }
 
-        /* PLAYER_1 */
-        if (line.find("PLAYER_1_NAME") != std::string::npos)
+        // PLAYERS
+        for (int playerNum = 0; playerNum < playersNum; playerNum++)
         {
-            getData(line, data);
-            player1->setPlayerName(data);
-        }
+            std::string playerNumAsString = std::to_string(playerNum);
+            if (line.find("PLAYER_" + playerNumAsString + "_NAME") != std::string::npos)
+            {
+                getData(line, data);
+                game->getPlayer(playerNum)->setPlayerName(data);
+            }
 
-        if (line.find("PLAYER_1_SCORE") != std::string::npos)
-        {
-            getData(line, data);
-            player1->setPlayerScore(stoi(data));
-        }
+            if (line.find("PLAYER_" + playerNumAsString + "_SCORE") != std::string::npos)
+            {
+                getData(line, data);
+                game->getPlayer(playerNum)->setPlayerScore(stoi(data));
+            }
 
-        for (int i = 0; i < 5; i++)
-        {
-            std::string playerPattern = "PLAYER_1_PATTERN_LINE";
-            playerPattern += std::to_string(i);
-            if (line.find(playerPattern) != std::string::npos)
+            for (int i = 0; i < 5; i++)
+            {
+                std::string playerPattern = "PLAYER_" + playerNumAsString + "_PATTERN_LINE";
+                playerPattern += std::to_string(i);
+                if (line.find(playerPattern) != std::string::npos)
+                {
+                    getData(line, data);
+
+                    dl = data.length();
+                    for (k = 0; k < dl; k++)
+                    {
+                        if (data[k] == NOTILE)
+                        {
+                            game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->removeTile(i);
+                        }
+                        else
+                        {
+                            game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->addTileToBack(data[k]);
+                        }
+                    }
+                }
+            }
+
+            if (line.find("PLAYER_" + playerNumAsString + "_FLOOR_LINE") != std::string::npos)
             {
                 getData(line, data);
 
                 dl = data.length();
                 for (k = 0; k < dl; k++)
                 {
-                    if (data[k] == NOTILE)
+                    if (data[k] != NOTILE)
                     {
-                        player1->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->removeTile(i);
-                    }
-                    else
-                    {
-                        player1->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->addTileToBack(data[k]);
+                        game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->addTileToBack(data[k]);
                     }
                 }
             }
-        }
 
-        if (line.find("PLAYER_1_FLOOR_LINE") != std::string::npos)
-        {
-            getData(line, data);
-
-            dl = data.length();
-            for (k = 0; k < dl; k++)
+            for (int i = 0; i < 5; i++)
             {
-                if (data[k] != NOTILE)
+                std::string playerMosaic = "PLAYER_" + playerNumAsString + "_MOSAIC_";
+                playerMosaic += std::to_string(i);
+                if (line.find(playerMosaic) != std::string::npos)
                 {
-                    player1->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->addTileToBack(data[k]);
-                }
-            }
-        }
+                    getData(line, data);
 
-        for (int i = 0; i < 5; i++)
-        {
-            std::string playerMosaic = "PLAYER_1_MOSAIC_";
-            playerMosaic += std::to_string(i);
-            if (line.find(playerMosaic) != std::string::npos)
-            {
-                getData(line, data);
-
-                dl = data.length();
-                for (k = 0; k < dl; k++)
-                {
-                    player1->getPlayerMosaic()->getPlayerWall()->getLine(i)->addTileToIndex(data[k], k);
-                    if (data[k] == NOTILE || data[k] == '.')
+                    dl = data.length();
+                    for (k = 0; k < dl; k++)
                     {
-                        player1->getPlayerMosaic()->getPlayerWall()->getLine(i)->removeTile(k);
-                    }
-                }
-            }
-        }
-
-        /* PLAYER_2 */
-        if (line.find("PLAYER_2_NAME") != std::string::npos)
-        {
-            getData(line, data);
-            player2->setPlayerName(data);
-        }
-
-        if (line.find("PLAYER_2_SCORE") != std::string::npos)
-        {
-            getData(line, data);
-            player2->setPlayerScore(stoi(data));
-        }
-
-        for (int i = 0; i < 5; i++)
-        {
-            std::string playerPattern = "PLAYER_2_PATTERN_LINE";
-            playerPattern += std::to_string(i);
-            if (line.find(playerPattern) != std::string::npos)
-            {
-                getData(line, data);
-
-                dl = data.length();
-                for (k = 0; k < dl; k++)
-                {
-                    if (data[k] == NOTILE)
-                    {
-                        player2->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->removeTile(i);
-                    }
-                    else
-                    {
-                        player2->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->addTileToBack(data[k]);
-                    }
-                }
-            }
-        }
-
-        if (line.find("PLAYER_2_FLOOR_LINE") != std::string::npos)
-        {
-            getData(line, data);
-
-            dl = data.length();
-            for (k = 0; k < dl; k++)
-            {
-                if (data[k] != NOTILE)
-                {
-                    player2->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->addTileToBack(data[k]);
-                }
-            }
-        }
-
-        for (int i = 0; i < 5; i++)
-        {
-            std::string playerMosaic = "PLAYER_2_MOSAIC_";
-            playerMosaic += std::to_string(i);
-            if (line.find(playerMosaic) != std::string::npos)
-            {
-                getData(line, data);
-
-                dl = data.length();
-                for (k = 0; k < dl; k++)
-                {
-                    player2->getPlayerMosaic()->getPlayerWall()->getLine(i)->addTileToIndex(data[k], k);
-                    if (data[k] == NOTILE || data[k] == '.')
-                    {
-                        player2->getPlayerMosaic()->getPlayerWall()->getLine(i)->removeTile(k);
+                        game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->addTileToIndex(data[k], k);
+                        if (data[k] == NOTILE || data[k] == '.')
+                        {
+                            game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->removeTile(k);
+                        }
                     }
                 }
             }
@@ -307,6 +277,7 @@ void LoadSave::loadFile(std::string loadFile, Player *player1, Player *player2, 
             }
         }
     }
+    return game;
 }
 
 // Getting the data after the '='

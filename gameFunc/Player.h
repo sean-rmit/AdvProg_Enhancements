@@ -11,8 +11,6 @@ public:
 
     // Constructor
     Player();
-    // Gets player and their score
-    Player(std::string name);
     // Deconstructor
     ~Player();
 
@@ -29,7 +27,7 @@ public:
     bool takeTilesFromFactoryToBrokenLine(Factory *factory, char colour, Centre *centre, Lid *lid);
     bool takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *lid);
     void moveTilesFromPatternLineToWall(Lid *lid);
-    void moveTilesFromBrokenTilesToLid(Lid *lid, Centre *centre);
+    void moveTilesFromBrokenTilesToLid(Lid *lid);
 
     void addPenaltyPoints();
     void addEndGameBonusPoints();

@@ -40,11 +40,11 @@ int BrokenTiles::getPenaltyPoints() {
     }
 }
 
-void BrokenTiles::moveAllTilesToLid(Lid *lid, Centre *centre) {
+void BrokenTiles::moveAllTilesToLid(Lid *lid) {
     for (int i = 0; i < brokenTiles->size(); i++) {
         if (brokenTiles->hasTile(i)) {
-            if (brokenTiles->getTileColour(i) == FIRSTPLAYER) {
-                centre->addTile(brokenTiles->removeTile(i));
+            if (brokenTiles->getTileColour(i) != FIRSTPLAYER) {
+                brokenTiles->removeTile(i);
             }
             else {
                 lid->addTileToBack(brokenTiles->removeTile(i));

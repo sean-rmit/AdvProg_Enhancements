@@ -6,18 +6,25 @@
 #include <sstream>
 #include <cstring>
 
-Game::Game(int playersNum, int seed)
+Game::Game()
 {
-    factories = new Factories(playersNum);
-    centre = new Centre;
+}
+
+Game::Game(int playersNum, int centresNum, int seed)
+{
+    factories = new Factories(playersNum, centresNum);
     players = new Players(playersNum);
     lid = new Lid();
     bag = new Bag();
+    twoCentres = false;
+    if (centresNum == 2)
+    {
+        twoCentres = true;
+    }
 }
 Game::~Game()
 {
     delete factories;
-    delete centre;
     delete players;
     delete lid;
     delete bag;
@@ -33,11 +40,12 @@ void Game::finaliseRound()
     {
         players->getPlayer(i)->addPenaltyPoints();
         players->getPlayer(i)->moveTilesFromPatternLineToWall(lid);
-        players->getPlayer(i)->moveTilesFromBrokenTilesToLid(lid, centre);
+        players->getPlayer(i)->moveTilesFromBrokenTilesToLid(lid);
     }
-    if (centre->size() == 0)
+    // 1 centre mode needs to manage Firstplayer token in it
+    if (factories->getCentresNum() == 1 && factories->getCentre(0)->size() == 0)
     {
-        centre->addTile(FIRSTPLAYER);
+        factories->getCentre(0)->addTile(FIRSTPLAYER);
     }
 }
 
@@ -58,21 +66,48 @@ void Game::prepareNewRound()
     }
 }
 
+bool Game::determineFirstPlayer(int &turnCounter)
+{
+    for (int i = 0; i < players->getPlayersNum(); i++)
+    {
+        for (int j = 0; j < players->getPlayer(i)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->size(); j++)
+        {
+            if (players->getPlayer(i)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTileColour(j) == FIRSTPLAYER)
+            {
+                turnCounter = i;
+                std::cout << "Player with Firstplayer token: " << players->getPlayer(i)->getPlayerName() << std::endl;
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool Game::playerMakesMove(int playerNum)
 {
     int factoryNum;
     char tileColour;
     int patternlineIndex;
+    int targetCentre = 0;
     std::string factoryNumAsString;
     std::cin >> factoryNumAsString;
     std::cin >> tileColour;
     std::string patternlineIndexAsString;
     std::cin >> patternlineIndexAsString;
+    std::string targetCentreAsString;
+    if (twoCentres)
+    {
+        std::cin >> targetCentreAsString;
+    }
 
     try
     {
         factoryNum = std::stoi(factoryNumAsString);
         patternlineIndex = std::stoi(patternlineIndexAsString);
+        if (twoCentres)
+        {
+            targetCentre = std::stoi(targetCentreAsString);
+        }
     }
     catch (std::invalid_argument const &e)
     {
@@ -107,34 +142,79 @@ bool Game::playerMakesMove(int playerNum)
         std::cout << "Invalid patternlineIndex!" << std::endl;
         return false;
     }
+
+    // validate targetCentre
+    if (twoCentres && (targetCentre < 0 || targetCentre > 1))
+    {
+        std::cout << "Invalid target Centre!" << std::endl;
+        return false;
+    }
+
     bool validMove = false;
     // player move
-    if (factoryNum == 0)
+    // if there are 2 centres, factory 0 & 1 are centres, factory 2 onwards is only an actual facory
+    if (twoCentres)
     {
-        // patternlineIndex = 6 is broken line
-        if (patternlineIndex == 6)
+        if (factoryNum == 0 || factoryNum == 1)
         {
-            validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(centre, tileColour, lid);
+            // patternlineIndex = 6 is broken line
+            if (patternlineIndex == 6)
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(factoryNum), tileColour, lid);
+            }
+            else
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, factories->getCentre(factoryNum), patternlineIndex - 1, lid);
+            }
+            return validMove;
         }
         else
         {
-            validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, centre, patternlineIndex - 1, lid);
+            // patternlineIndex = 6 is broken line
+            // factoryNum - 2 to remove the 2 centres at the front
+            if (patternlineIndex == 6)
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 2), tileColour, factories->getCentre(targetCentre), lid);
+            }
+            else
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromFactory(factories->getFactory(factoryNum - 2), tileColour, factories->getCentre(targetCentre), patternlineIndex - 1, lid);
+            }
+            return validMove;
         }
-        return validMove;
     }
+    // if there is only 1 centre
     else
     {
-        // patternlineIndex = 6 is broken line
-        if (patternlineIndex == 6)
+        if (factoryNum == 0)
         {
-            validMove = players->getPlayer(playerNum)->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 1), tileColour, centre, lid);
+            // patternlineIndex = 6 is broken line
+            if (patternlineIndex == 6)
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(targetCentre), tileColour, lid);
+            }
+            else
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, factories->getCentre(targetCentre), patternlineIndex - 1, lid);
+            }
+            return validMove;
         }
         else
         {
-            validMove = players->getPlayer(playerNum)->takeTilesFromFactory(factories->getFactory(factoryNum - 1), tileColour, centre, patternlineIndex - 1, lid);
+            // patternlineIndex = 6 is broken line
+            // factoryNum - 1 to remove the 1 centre at the front
+            if (patternlineIndex == 6)
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 1), tileColour, factories->getCentre(targetCentre), lid);
+            }
+            else
+            {
+                validMove = players->getPlayer(playerNum)->takeTilesFromFactory(factories->getFactory(factoryNum - 1), tileColour, factories->getCentre(targetCentre), patternlineIndex - 1, lid);
+            }
+            return validMove;
         }
-        return validMove;
     }
+
     std::cout << "DEBUG: end of playerMakesMove() function reached, this shouldn't happen" << std::endl;
     return false;
 }
@@ -143,10 +223,14 @@ bool Game::hasRoundEnded()
 {
     bool isEverythingEmpty = true;
     // check if centre is empty
-    if (centre->size() != 0)
+    for (int i = 0; i < factories->getCentresNum(); i++)
     {
-        isEverythingEmpty = false;
+        if (factories->getCentre(i)->size() != 0)
+        {
+            isEverythingEmpty = false;
+        }
     }
+
     // check if each factory is empty
     for (int i = 0; i < factories->getFactoriesNum(); i++)
     {
@@ -185,17 +269,28 @@ void Game::finaliseGame()
         std::cout << players->getPlayer(i)->getPlayerName() << "'s score: " << players->getPlayer(i)->getPlayerScore() << std::endl;
     }
 
-    // TODO: tie feature
-    int playerWithHighestScore = 0;
+    // A vector of players with highest score as there might be a tie
+    std::vector<int> playerWithHighestScore;
     int highestScore = 0;
     for (int i = 0; i < players->getPlayersNum(); i++)
     {
-        if (players->getPlayer(i)->getPlayerScore() > highestScore) {
+        // if the iterated player's score exceeded the previous highest
+        if (players->getPlayer(i)->getPlayerScore() > highestScore)
+        {
             highestScore = players->getPlayer(i)->getPlayerScore();
-            playerWithHighestScore = i;
+            playerWithHighestScore.clear();
+            playerWithHighestScore.push_back(i);
+        }
+        // if the iterated player's score is the same as the previous highest
+        else if (players->getPlayer(i)->getPlayerScore() == highestScore) {
+            playerWithHighestScore.push_back(i);
         }
     }
-    std::cout << players->getPlayer(playerWithHighestScore)->getPlayerName() << " wins the game!" << std::endl;
+    std::cout << "The following player(s) has won the game: " << std::endl;
+    for (int i = 0; i < (int)playerWithHighestScore.size(); i++) {
+        std::cout << players->getPlayer(playerWithHighestScore.at(i))->getPlayerName() << std::endl;
+    }
+    std::cout << "Congratulations!!!" << std::endl;
 }
 
 // getters and setters
@@ -204,12 +299,8 @@ factoriesPtr Game::getFactories()
     return this->factories;
 }
 
-centrePtr Game::getCentre()
+playersPtr Game::getPlayers()
 {
-    return this->centre;
-}
-
-playersPtr Game::getPlayers() {
     return this->players;
 }
 

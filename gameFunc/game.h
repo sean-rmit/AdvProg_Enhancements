@@ -2,7 +2,6 @@
 #define AzulGame
 
 #include "Factories.h"
-#include "Centre.h"
 #include "Players.h"
 #include "BoxLid.h"
 #include "TileBag.h"
@@ -13,7 +12,7 @@ class Game {
 public:
 
     Game();
-    Game(int playersNum, int seed);
+    Game(int playersNum, int centresNum, int seed);
     ~Game();
 
     // copy constructor
@@ -24,6 +23,8 @@ public:
 
     // Prepares for a new round after finalise round is called
     void prepareNewRound();
+
+    bool determineFirstPlayer(int &turnCounter);
 
     // Gets the input of the player and validates their move
     bool playerMakesMove(int playerNum);
@@ -41,7 +42,6 @@ public:
     void finaliseLoadedGame();
 
     factoriesPtr getFactories();
-    centrePtr getCentre();
     playersPtr getPlayers();
     playerPtr getPlayer(int index);
     lidPtr getLid();
@@ -49,10 +49,12 @@ public:
 
 private:
     Factories *factories;
-    Centre *centre;
     Players *players;
     Lid *lid;
     Bag *bag;
+    bool twoCentres;
 };
+
+typedef Game* gamePtr;
 
 #endif // Azul Game

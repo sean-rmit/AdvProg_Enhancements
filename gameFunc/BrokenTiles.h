@@ -25,7 +25,7 @@ public:
 
     linePtr getLine();
     int getPenaltyPoints();
-    void moveAllTilesToLid(Lid *lid, Centre *centre);
+    void moveAllTilesToLid(Lid *lid);
 
 private:
    Line *brokenTiles;

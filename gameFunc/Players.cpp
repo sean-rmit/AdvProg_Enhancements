@@ -38,7 +38,7 @@ playerPtr Players::getPlayer(int index) {
     }
     catch (char const *e)
     {
-        std::cout << "Error! Factory has exceeded 4 factories! ";
+        std::cout << "Error! Index exceeded number of players! ";
         std::cout << e << std::endl;
     }
     return players[index];

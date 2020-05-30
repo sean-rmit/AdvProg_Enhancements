@@ -103,29 +103,35 @@ void mainMenuPage(int seed)
         else if (input == 'N' || input == 'n')
         {
             std::cout << "Number of players: " << std::endl;
-            int number;
-            std::string numberAsString;
-            std::cin >> numberAsString;
+            int playersNum = 0;
+            std::string playersNumAsString;
+            std::cin >> playersNumAsString;
+            int centresNum = 0;
+            std::cout << "Number of centres: " << std::endl;
+            std::string centresNumAsString;
+            std::cin >> centresNumAsString;
             try
             {
-                number = std::stoi(numberAsString);
+                playersNum = std::stoi(playersNumAsString);
+                centresNum = std::stoi(centresNumAsString);
             }
             catch (std::invalid_argument const &e)
             {
-                std::cout << "Invalid input" << std::endl;
+                
             }
-            if (number >= 2 && number <= 4)
+            if (playersNum >= 2 && playersNum <= 4 && centresNum >= 1 && centresNum <= 2)
             {
-                newGamePage(number, seed);
+                newGamePage(playersNum, centresNum, seed);
                 mainMenuRunning = false;
             }
-            else {
-                std::cout << "Invalid number" << std::endl;
+            else
+            {
+                std::cout << "Invalid number of players or centres!" << std::endl;
             }
         }
         else if (input == 'L' || input == 'l')
         {
-            loadGamePage(seed);
+            loadGamePage();
             mainMenuRunning = false;
         }
         else
@@ -135,7 +141,7 @@ void mainMenuPage(int seed)
     }
 }
 
-void newGamePage(int playersNum, int seed)
+void newGamePage(int playersNum, int centresNum, int seed)
 {
     //line 1
     printString("=", PAGEWIDTH);
@@ -152,7 +158,7 @@ void newGamePage(int playersNum, int seed)
     std::cout << std::endl;
 
     // game initialised
-    Game *game = new Game(playersNum, seed);
+    Game *game = new Game(playersNum, centresNum, seed);
 
     // take in player names
     for (int i = 0; i < playersNum; i++)
@@ -165,7 +171,10 @@ void newGamePage(int playersNum, int seed)
     }
 
     game->getBag()->fillBagWithTiles(seed);
-    game->getCentre()->addTile(FIRSTPLAYER);
+    if (centresNum == 1) {
+        game->getFactories()->getCentre(0)->addTile(FIRSTPLAYER);
+    }
+    
     bool gameOngoing = true;
     std::cout << "Let’s Play!\n"
               << std::endl;
@@ -174,7 +183,7 @@ void newGamePage(int playersNum, int seed)
     std::cout << "Save the game: save" << std::endl;
     std::cout << "Quit the game: quit" << std::endl;
     std::cout << std::endl;
-    int roundCounter = 1; // odd = player 1 turn, even = player 2 turn
+    int turnCounter = 0;
     while (gameOngoing)
     {
         bool roundOngoing = true;
@@ -184,11 +193,167 @@ void newGamePage(int playersNum, int seed)
         game->prepareNewRound();
         while (roundOngoing)
         {
-            int playerNum = roundCounter % playersNum;
+            int playerNum = turnCounter % playersNum;
             std::cout << "TURN FOR PLAYER: ";
             std::cout << game->getPlayer(playerNum)->getPlayerName() << std::endl;
 
-            printFactories(game->getCentre(), game->getFactories());
+            printFactories(game->getFactories());
+            std::cout << std::endl;
+            // printPlayerMosaic(game->getPlayer(playerNum));
+            printPlayerMosaics(game->getPlayers());
+            bool validMove = false;
+            // loop until valid move is made
+            while (!validMove)
+            {
+                std::cout << game->getPlayer(playerNum)->getPlayerName() << "'s turn to make a move:" << std::endl;
+                std::cout << "> ";
+                std::string playerMove;
+                std::cin >> playerMove;
+
+                // if Ctrl+D is entered terminate the while loops
+                if (std::cin.eof())
+                {
+                    validMove = true;
+                    roundOngoing = false;
+                    gameOngoing = false;
+                    game->finaliseGame();
+                }
+
+                if (playerMove == "save")
+                {
+                    validMove = true;
+                    roundOngoing = false;
+                    gameOngoing = false;
+                    std::cout << "Enter the filename (.txt) you wish to save to:" << std::endl;
+                    std::cout << "> ";
+                    std::string filename;
+                    std::cin >> filename;
+                    LoadSave *save = new LoadSave();
+                    save->saveFile(filename, game->getPlayers(), game->getFactories(), game->getBag(), game->getLid(), turnCounter);
+                    delete save;
+                }
+                else if (playerMove == "quit")
+                {
+                    validMove = true;
+                    roundOngoing = false;
+                    gameOngoing = false;
+                    game->finaliseGame();
+                }
+                else if (playerMove == "turn")
+                {
+                    validMove = game->playerMakesMove(playerNum);
+                    if (validMove)
+                    {
+                        std::cout << "Turn Successful." << std::endl;
+                    }
+                }
+                if (!validMove)
+                {
+                    std::cout << "Invalid Move." << std::endl;
+                    std::cout << "To make a move:" << std::endl;
+                    std::cout << "turn <factory index> <tile colour> <patternline index>" << std::endl;
+                }
+            }
+            turnCounter++;
+            // check if the round has ended (aka factories and centre are all empty)
+            if (game->hasRoundEnded())
+            {
+                game->determineFirstPlayer(turnCounter);
+                game->finaliseRound();
+                roundOngoing = false;
+            }
+            if (game->hasGameEnded())
+            {
+                game->finaliseGame();
+                roundOngoing = false;
+                gameOngoing = false;
+            }
+        }
+    }
+    std::cout << "=== GAME OVER ===" << std::endl;
+    delete game;
+}
+
+void loadGamePage()
+{
+    //line 1
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+
+    //line 2
+    printString(" ", PAGEWIDTH / 2 - 4);
+    std::cout << "LOAD GAME";
+    std::cout << std::endl;
+
+    //line 3
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    // User input for filename
+    std::cout << "Enter the filename you wish to load the game from:" << std::endl;
+    std::cout << "> ";
+    std::string filename;
+    std::cin >> filename;
+
+    bool gameOngoing = true;
+    int turnCounter = 0;
+    int playersNum = 0;
+    LoadSave *load = new LoadSave();
+    Game *game = load->loadFile(filename, turnCounter);
+    playersNum = game->getPlayers()->getPlayersNum();
+    delete load;
+    std::cout << "=== Azul Game Successfully Loaded ===" << std::endl;
+    std::cout << "Let’s Play!\n"
+              << std::endl;
+    std::cout << "== INSTRUCTIONS ==" << std::endl;
+    std::cout << "Make a move: turn <factory index> <tile colour> <patternline index>" << std::endl;
+    std::cout << "Save the game: save" << std::endl;
+    std::cout << "Quit the game: quit\n"
+              << std::endl;
+    std::cout << "== Current Player Progress ==" << std::endl;
+    for (int i = 0; i < playersNum; i++)
+    {
+        printPlayerMosaic(game->getPlayer(i));
+    }
+    std::cout << std::endl;
+    bool firstRoundSinceLoad = true;
+
+    while (gameOngoing)
+    {
+        bool roundOngoing = true;
+        // initialise the round (i.e. load factories with tiles)
+        if (!firstRoundSinceLoad)
+        {
+            std::cout << "=== Start Round ===" << std::endl;
+            printPlayerPoints(game->getPlayers());
+            game->prepareNewRound();
+        }
+        else
+        {
+            // check if the round has ended (aka factories and centre are all empty)
+            if (game->hasRoundEnded())
+            {
+                game->determineFirstPlayer(turnCounter);
+                game->finaliseRound();
+                roundOngoing = false;
+            }
+            if (game->hasGameEnded())
+            {
+                game->finaliseGame();
+                roundOngoing = false;
+                gameOngoing = false;
+            }
+            firstRoundSinceLoad = false;
+        }
+
+        while (roundOngoing)
+        {
+            int playerNum = turnCounter % playersNum;
+            std::cout << "TURN FOR PLAYER: ";
+            std::cout << game->getPlayer(playerNum)->getPlayerName() << std::endl;
+
+            printFactories(game->getFactories());
             std::cout << std::endl;
             printPlayerMosaic(game->getPlayer(playerNum));
             bool validMove = false;
@@ -219,8 +384,7 @@ void newGamePage(int playersNum, int seed)
                     std::string filename;
                     std::cin >> filename;
                     LoadSave *save = new LoadSave();
-                    // TODO
-                    // save->saveFile(filename, player1, player2, game->getCentre(), game->getFactories(), game->getBag(), game->getLid(), roundCounter);
+                    save->saveFile(filename, game->getPlayers(), game->getFactories(), game->getBag(), game->getLid(), turnCounter);
                     delete save;
                 }
                 else if (playerMove == "quit")
@@ -245,205 +409,11 @@ void newGamePage(int playersNum, int seed)
                     std::cout << "turn <factory index> <tile colour> <patternline index>" << std::endl;
                 }
             }
-            roundCounter++;
+            turnCounter++;
             // check if the round has ended (aka factories and centre are all empty)
             if (game->hasRoundEnded())
             {
-                game->finaliseRound();
-                roundOngoing = false;
-            }
-            if (game->hasGameEnded())
-            {
-                game->finaliseGame();
-                roundOngoing = false;
-                gameOngoing = false;
-            }
-        }
-    }
-    std::cout << "=== GAME OVER ===" << std::endl;
-    delete game;
-}
-
-void loadGamePage(int seed)
-{
-    //line 1
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-
-    //line 2
-    printString(" ", PAGEWIDTH / 2 - 4);
-    std::cout << "LOAD GAME";
-    std::cout << std::endl;
-
-    //line 3
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    // User input for filename
-    std::cout << "Enter the filename you wish to load the game from:" << std::endl;
-    std::cout << "> ";
-    std::string filename;
-    std::cin >> filename;
-
-    Player *player1 = new Player();
-    Player *player2 = new Player();
-
-    // game initialised
-    Game *game = new Game(player1->getPlayerName(), player2->getPlayerName(), seed);
-
-    player1 = game->getPlayer1();
-    player2 = game->getPlayer2();
-
-    bool gameOngoing = true;
-    int roundCounter = 0; // odd = player 1 turn, even = player 2 turn
-
-    Factories *factories = game->getFactories();
-
-    LoadSave *load = new LoadSave();
-    load->loadFile(filename, player1, player2, game->getCentre(), factories, game->getBag(), game->getLid(), roundCounter);
-    delete load;
-    if (game->getCentre()->getTileColour(0) == FIRSTPLAYER)
-    {
-        std::cout << "It's firstplayer token\n"
-                  << std::endl;
-    }
-    std::cout << "=== Azul Game Successfully Loaded ===" << std::endl;
-    std::cout << "Let’s Play!\n"
-              << std::endl;
-    std::cout << "== INSTRUCTIONS ==" << std::endl;
-    std::cout << "Make a move: turn <factory index> <tile colour> <patternline index>" << std::endl;
-    std::cout << "Save the game: save" << std::endl;
-    std::cout << "Quit the game: quit\n"
-              << std::endl;
-    std::cout << "== Current Player Progress ==" << std::endl;
-    printPlayerMosaic(player1);
-    printPlayerMosaic(player2);
-    std::cout << std::endl;
-    bool firstRoundSinceLoad = true;
-
-    while (gameOngoing)
-    {
-        bool roundOngoing = true;
-        // initialise the round (i.e. load factories with tiles)
-        if (!firstRoundSinceLoad)
-        {
-            std::cout << "=== Start Round ===" << std::endl;
-            printPlayerPoints(player1, player2);
-            game->prepareNewRound();
-            printPlayerPoints(player1, player2);
-        }
-        else
-        {
-            // check if the round has ended (aka factories and centre are all empty)
-            if (game->hasRoundEnded())
-            {
-                game->finaliseRound();
-                roundOngoing = false;
-            }
-            if (game->hasGameEnded())
-            {
-                game->finaliseGame();
-                roundOngoing = false;
-                gameOngoing = false;
-            }
-            firstRoundSinceLoad = false;
-        }
-
-        while (roundOngoing)
-        {
-            std::cout << "TURN FOR PLAYER: ";
-            if (roundCounter % 2 == 1)
-            {
-                std::cout << player1->getPlayerName() << std::endl;
-            }
-            else
-            {
-                std::cout << player2->getPlayerName() << std::endl;
-            }
-
-            printFactories(game->getCentre(), factories);
-            std::cout << std::endl;
-            if (roundCounter % 2 == 1)
-            {
-                printPlayerMosaic(player1);
-            }
-            else
-            {
-                printPlayerMosaic(player2);
-            }
-            bool validMove = false;
-            // loop until valid move is made
-            while (!validMove)
-            {
-                if (roundCounter % 2 == 1)
-                {
-                    std::cout << player1->getPlayerName();
-                }
-                else
-                {
-                    std::cout << player2->getPlayerName();
-                }
-                std::cout << "'s turn to make a move:" << std::endl;
-                std::cout << "> ";
-                std::string playerMove;
-                std::cin >> playerMove;
-
-                // if Ctrl+D is entered terminate the while loops
-                if (std::cin.eof())
-                {
-                    validMove = true;
-                    roundOngoing = false;
-                    gameOngoing = false;
-                    game->finaliseGame();
-                }
-
-                if (playerMove == "save")
-                {
-                    validMove = true;
-                    roundOngoing = false;
-                    gameOngoing = false;
-                    std::cout << "Enter the filename (.txt) you wish to save to:" << std::endl;
-                    std::cout << "> ";
-                    std::string filename;
-                    std::cin >> filename;
-                    LoadSave *save = new LoadSave();
-                    save->saveFile(filename, player1, player2, game->getCentre(), factories, game->getBag(), game->getLid(), roundCounter);
-                    delete save;
-                }
-                else if (playerMove == "quit")
-                {
-                    validMove = true;
-                    roundOngoing = false;
-                    gameOngoing = false;
-                    game->finaliseGame();
-                }
-                else if (playerMove == "turn")
-                {
-                    if (roundCounter % 2 == 1)
-                    {
-                        validMove = game->playerMakesMove(1);
-                    }
-                    else
-                    {
-                        validMove = game->playerMakesMove(2);
-                    }
-                    if (validMove)
-                    {
-                        std::cout << "Turn Successful." << std::endl;
-                    }
-                }
-                if (!validMove)
-                {
-                    std::cout << "Invalid Move." << std::endl;
-                    std::cout << "To make a move:" << std::endl;
-                    std::cout << "turn <factory index> <tile colour> <patternline index>" << std::endl;
-                }
-            }
-            roundCounter++;
-            // check if the round has ended (aka factories and centre are all empty)
-            if (game->hasRoundEnded())
-            {
+                game->determineFirstPlayer(turnCounter);
                 game->finaliseRound();
                 roundOngoing = false;
             }
