@@ -1,8 +1,14 @@
 #include "BrokenTiles.h"
 
 
-BrokenTiles::BrokenTiles() {
-    brokenTiles = new Line(MAX_BROKEN_TILES);
+BrokenTiles::BrokenTiles(bool advMode) {
+    if (advMode) {
+        brokenTilesNum = ADV_MAX_BROKEN_TILES;
+    }
+    else {
+        brokenTilesNum = NORMAL_MAX_BROKEN_TILES;
+    }
+    brokenTiles = new Line(brokenTilesNum);
 }
 
 BrokenTiles::~BrokenTiles() {
@@ -35,15 +41,19 @@ int BrokenTiles::getPenaltyPoints() {
     else if (brokenTiles->getTilesNumber() == 6) {
         return SIX_TILE_PENALTY;
     }
-    else {
+    else if (brokenTiles->getTilesNumber() == 7) {
         return SEVEN_TILE_PENALTY;
+    }
+    else {
+        return EIGHT_TILE_PENALTY;
     }
 }
 
 void BrokenTiles::moveAllTilesToLid(Lid *lid) {
     for (int i = 0; i < brokenTiles->size(); i++) {
         if (brokenTiles->hasTile(i)) {
-            if (brokenTiles->getTileColour(i) != FIRSTPLAYER) {
+            // do not add the tile to lid if it is the Firstplayer token
+            if (brokenTiles->getTileColour(i) == FIRSTPLAYER) {
                 brokenTiles->removeTile(i);
             }
             else {

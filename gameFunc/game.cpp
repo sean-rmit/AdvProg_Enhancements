@@ -8,15 +8,24 @@
 
 Game::Game()
 {
-}
-
-Game::Game(int playersNum, int centresNum, int seed)
-{
-    factories = new Factories(playersNum, centresNum);
-    players = new Players(playersNum);
     lid = new Lid();
     bag = new Bag();
     twoCentres = false;
+    firstplayerTokenTaken = false;
+    greyMode = false;
+    advMode = false;
+}
+
+Game::Game(int playersNum, int centresNum, bool advMode, bool greyMode, int seed)
+{
+    this->advMode = advMode;
+    this->greyMode = greyMode;
+    factories = new Factories(playersNum, centresNum);
+    players = new Players(playersNum, advMode, greyMode);
+    lid = new Lid();
+    bag = new Bag();
+    twoCentres = false;
+    firstplayerTokenTaken = false;
     if (centresNum == 2)
     {
         twoCentres = true;
@@ -34,12 +43,22 @@ Game::Game(Game &other)
 {
 }
 
+void Game::createFactoriesAndPlayers(int playersNum, int centresNum, bool advMode, bool greyMode)
+{
+    factories = new Factories(playersNum, centresNum);
+    players = new Players(playersNum, advMode, greyMode);
+    if (centresNum == 2)
+    {
+        twoCentres = true;
+    }
+}
+
 void Game::finaliseRound()
 {
     for (int i = 0; i < players->getPlayersNum(); i++)
     {
         players->getPlayer(i)->addPenaltyPoints();
-        players->getPlayer(i)->moveTilesFromPatternLineToWall(lid);
+        players->getPlayer(i)->moveTilesFromPatternLineToWall(lid, greyMode);
         players->getPlayer(i)->moveTilesFromBrokenTilesToLid(lid);
     }
     // 1 centre mode needs to manage Firstplayer token in it
@@ -47,6 +66,7 @@ void Game::finaliseRound()
     {
         factories->getCentre(0)->addTile(FIRSTPLAYER);
     }
+    firstplayerTokenTaken = false;
 }
 
 void Game::prepareNewRound()
@@ -95,19 +115,12 @@ bool Game::playerMakesMove(int playerNum)
     std::string patternlineIndexAsString;
     std::cin >> patternlineIndexAsString;
     std::string targetCentreAsString;
-    if (twoCentres)
-    {
-        std::cin >> targetCentreAsString;
-    }
 
+    // parsing the inputs into desirable variable types
     try
     {
         factoryNum = std::stoi(factoryNumAsString);
         patternlineIndex = std::stoi(patternlineIndexAsString);
-        if (twoCentres)
-        {
-            targetCentre = std::stoi(targetCentreAsString);
-        }
     }
     catch (std::invalid_argument const &e)
     {
@@ -118,6 +131,26 @@ bool Game::playerMakesMove(int playerNum)
     {
         std::cout << "Integer overflow: std::out_of_range thrown" << std::endl;
         return false;
+    }
+    if (twoCentres && factoryNum > 1)
+    {
+        std::cout << "Select a centre to put your excess tiles:" << std::endl;
+        std::cout << ">";
+        std::cin >> targetCentreAsString;
+        try
+        {
+            targetCentre = std::stoi(targetCentreAsString);
+        }
+        catch (std::invalid_argument const &e)
+        {
+            std::cout << "Invalid input" << std::endl;
+            return false;
+        }
+        catch (std::out_of_range const &e)
+        {
+            std::cout << "Integer overflow: std::out_of_range thrown" << std::endl;
+            return false;
+        }
     }
 
     // validate factoryNum
@@ -137,7 +170,7 @@ bool Game::playerMakesMove(int playerNum)
 
     // validate patternlineIndex
     // PATTERN_LINES_NUM + 1 because broken line is included
-    if (patternlineIndex < 1 || patternlineIndex > PATTERN_LINES_NUM + 1)
+    if (patternlineIndex < 1 || patternlineIndex > players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 1)
     {
         std::cout << "Invalid patternlineIndex!" << std::endl;
         return false;
@@ -160,11 +193,11 @@ bool Game::playerMakesMove(int playerNum)
             // patternlineIndex = 6 is broken line
             if (patternlineIndex == 6)
             {
-                validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(factoryNum), tileColour, lid);
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(factoryNum), tileColour, lid, firstplayerTokenTaken);
             }
             else
             {
-                validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, factories->getCentre(factoryNum), patternlineIndex - 1, lid);
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, factories->getCentre(factoryNum), patternlineIndex - 1, lid, firstplayerTokenTaken);
             }
             return validMove;
         }
@@ -191,11 +224,11 @@ bool Game::playerMakesMove(int playerNum)
             // patternlineIndex = 6 is broken line
             if (patternlineIndex == 6)
             {
-                validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(targetCentre), tileColour, lid);
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(targetCentre), tileColour, lid, firstplayerTokenTaken);
             }
             else
             {
-                validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, factories->getCentre(targetCentre), patternlineIndex - 1, lid);
+                validMove = players->getPlayer(playerNum)->takeTilesFromCentre(tileColour, factories->getCentre(targetCentre), patternlineIndex - 1, lid, firstplayerTokenTaken);
             }
             return validMove;
         }
@@ -244,7 +277,7 @@ bool Game::hasRoundEnded()
 
 bool Game::hasGameEnded()
 {
-    for (int i = 0; i < WALL_LINES_NUM; i++)
+    for (int i = 0; i < players->getPlayer(0)->getPlayerMosaic()->getPlayerWall()->getWallLinesNum(); i++)
     {
         for (int j = 0; j < players->getPlayersNum(); j++)
         {
@@ -282,12 +315,14 @@ void Game::finaliseGame()
             playerWithHighestScore.push_back(i);
         }
         // if the iterated player's score is the same as the previous highest
-        else if (players->getPlayer(i)->getPlayerScore() == highestScore) {
+        else if (players->getPlayer(i)->getPlayerScore() == highestScore)
+        {
             playerWithHighestScore.push_back(i);
         }
     }
     std::cout << "The following player(s) has won the game: " << std::endl;
-    for (int i = 0; i < (int)playerWithHighestScore.size(); i++) {
+    for (int i = 0; i < (int)playerWithHighestScore.size(); i++)
+    {
         std::cout << players->getPlayer(playerWithHighestScore.at(i))->getPlayerName() << std::endl;
     }
     std::cout << "Congratulations!!!" << std::endl;

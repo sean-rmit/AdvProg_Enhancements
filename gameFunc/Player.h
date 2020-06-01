@@ -5,12 +5,13 @@
 #include "Factory.h"
 #include "Centre.h"
 #include "Line.h"
+#include "utils.h"
 
 class Player {
 public:
 
     // Constructor
-    Player();
+    Player(bool advMode, bool greyMode);
     // Deconstructor
     ~Player();
 
@@ -23,10 +24,10 @@ public:
     // add the score to player's total score
     void addToPlayerScore(int score);
     bool takeTilesFromFactory(Factory *factory, char colour, Centre *centre, int patternLineIndex, Lid *lid);
-    bool takeTilesFromCentre(char colour, Centre *centre, int patternLineIndex, Lid *lid);
+    bool takeTilesFromCentre(char colour, Centre *centre, int patternLineIndex, Lid *lid, bool &firstPlayerTokenTaken);
     bool takeTilesFromFactoryToBrokenLine(Factory *factory, char colour, Centre *centre, Lid *lid);
-    bool takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *lid);
-    void moveTilesFromPatternLineToWall(Lid *lid);
+    bool takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *lid, bool &firstPlayerTokenTaken);
+    void moveTilesFromPatternLineToWall(Lid *lid, bool greyMode);
     void moveTilesFromBrokenTilesToLid(Lid *lid);
 
     void addPenaltyPoints();

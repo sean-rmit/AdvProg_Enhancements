@@ -7,6 +7,7 @@
 #define DARKBLUE        'B'
 #define LIGHTBLUE       'L'
 #define BLACK           'U'
+#define ORANGE          'O'
 #define NOTILE          '.'
 #define SPACE           ' '
 
@@ -15,6 +16,6 @@
 #define DARKBLUE_TILES_NUM  20
 #define LIGHTBLUE_TILES_NUM 20
 #define BLACK_TILES_NUM     20
-
+#define ORANGE_TILES_NUM    20
 
 #endif // tiles

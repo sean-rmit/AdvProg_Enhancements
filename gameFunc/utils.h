@@ -9,11 +9,11 @@
 #define GAP_SIZE                            4
 
 void printString(std::string s, int num);
+void printInstructions(int numCentres);
 void printFactories(Factories *factories);
-void printPlayerMosaic(Player *player);
 void printPlayerMosaics(Players *players);
 void printPlayerPoints(Players *players);
-
+void printGreyModeTiltingUI(Player *player, int patternLineIndex, bool instructions);
 
 
 #endif // UTILS_H

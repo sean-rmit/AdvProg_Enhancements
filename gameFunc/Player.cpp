@@ -1,10 +1,10 @@
 #include "Player.h"
 #include <iostream>
 
-Player::Player()
+Player::Player(bool advMode, bool greyMode)
 {
     this->playerScore = 0;
-    playerMosaic = new Mosaic();
+    playerMosaic = new Mosaic(advMode, greyMode);
 }
 
 Player::~Player()
@@ -27,7 +27,8 @@ mosaicPtr Player::getPlayerMosaic()
     return playerMosaic;
 }
 
-void Player::setPlayerMosaic(Mosaic *mosaic) {
+void Player::setPlayerMosaic(Mosaic *mosaic)
+{
     playerMosaic = mosaic;
 }
 
@@ -67,9 +68,12 @@ bool Player::takeTilesFromFactory(Factory *factory, char colour, Centre *centre,
         std::cout << "Pattern line has tiles of colour " << playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) << " but you chose the color " << colour << ". Invalid move!" << std::endl;
     }
     // check if wall already has that colour
-    for (int i = 0; i < WALL_LINES_NUM; i++) {
-        if (playerMosaic->getPlayerWall()->getLine(patternLineIndex)->hasTile(i)) {
-            if (playerMosaic->getPlayerWall()->getLine(patternLineIndex)->getTileColour(i) == colour) {
+    for (int i = 0; i < playerMosaic->getPlayerWall()->getWallLinesNum(); i++)
+    {
+        if (playerMosaic->getPlayerWall()->getLine(patternLineIndex)->hasTile(i))
+        {
+            if (playerMosaic->getPlayerWall()->getLine(patternLineIndex)->getTileColour(i) == colour)
+            {
                 std::cout << "Wall already has that color on this line!" << std::endl;
                 return false;
             }
@@ -138,7 +142,7 @@ bool Player::takeTilesFromFactory(Factory *factory, char colour, Centre *centre,
     return tilesTaken;
 }
 
-bool Player::takeTilesFromCentre(char colour, Centre *centre, int patternLineIndex, Lid *lid)
+bool Player::takeTilesFromCentre(char colour, Centre *centre, int patternLineIndex, Lid *lid, bool &firstPlayerTokenTaken)
 {
     bool tilesTaken = false;
     // if patternLine at patternLineIndex is already full, invalid move
@@ -212,6 +216,7 @@ bool Player::takeTilesFromCentre(char colour, Centre *centre, int patternLineInd
     // only take the Firstplayer token if at least one coloured tile was taken from the centre,
     // else it was a invalid move and player should repeat his turn again
     // also does not take the Firstplayer token if the player's brokenline is full
+    // for 1-centre game
     if (tilesTaken && !playerMosaic->getPlayerBrokenTiles()->getLine()->isFull() && centre->size() > 0 && centre->getTileColour(0) == FIRSTPLAYER)
     {
         // check if the player's broken tiles is full
@@ -219,9 +224,20 @@ bool Player::takeTilesFromCentre(char colour, Centre *centre, int patternLineInd
         {
             playerMosaic->getPlayerBrokenTiles()->getLine()->addTileToBack(centre->removeTile(0));
         }
-        else {
+        else
+        {
+            // remove the F token anyway if the player is suppose to take it but couldn't due to a full
+            // broken line, if this happens the firstplayer next round will be the player who started
+            // this round
             centre->removeTile(0);
         }
+        firstPlayerTokenTaken = true;
+    }
+    // for 2-centre game
+    if (tilesTaken && !playerMosaic->getPlayerBrokenTiles()->getLine()->isFull() && !firstPlayerTokenTaken)
+    {
+        playerMosaic->getPlayerBrokenTiles()->getLine()->addTileToBack(FIRSTPLAYER);
+        firstPlayerTokenTaken = true;
     }
     return tilesTaken;
 }
@@ -288,7 +304,7 @@ bool Player::takeTilesFromFactoryToBrokenLine(Factory *factory, char colour, Cen
     return tilesTaken;
 }
 
-bool Player::takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *lid)
+bool Player::takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *lid, bool &firstPlayerTokenTaken)
 {
     bool tilesTaken = false;
     // check if centre contains the color specified first, if none then invalid move
@@ -333,6 +349,7 @@ bool Player::takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *l
     // only take the Firstplayer token if at least one coloured tile was taken from the centre,
     // else it was a invalid move and player should repeat his turn again
     // Firstplayer token also does not get taken if the player's brokenline is full
+    // for 1-centre game
     if (tilesTaken && !playerMosaic->getPlayerBrokenTiles()->getLine()->isFull() && centre->size() > 0 && centre->getTileColour(0) == FIRSTPLAYER)
     {
         // check if the player's broken tiles is full
@@ -340,20 +357,85 @@ bool Player::takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *l
         {
             playerMosaic->getPlayerBrokenTiles()->getLine()->addTileToBack(centre->removeTile(0));
         }
+        else
+        {
+            // remove the F token anyway if the player is suppose to take it but couldn't due to a full
+            // broken line, if this happens the firstplayer next round will be the player who started
+            // this round
+            centre->removeTile(0);
+        }
+        firstPlayerTokenTaken = true;
+    }
+    // for 2-centre game
+    if (tilesTaken && !playerMosaic->getPlayerBrokenTiles()->getLine()->isFull() && !firstPlayerTokenTaken)
+    {
+        playerMosaic->getPlayerBrokenTiles()->getLine()->addTileToBack(FIRSTPLAYER);
+        firstPlayerTokenTaken = true;
     }
     return tilesTaken;
 }
 
-void Player::moveTilesFromPatternLineToWall(Lid *lid)
+void Player::moveTilesFromPatternLineToWall(Lid *lid, bool greyMode)
 {
-    for (int lineIndex = 0; lineIndex < PATTERN_LINES_NUM; lineIndex++)
+    if (!greyMode)
     {
-        if (playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->isFull())
+        for (int lineIndex = 0; lineIndex < playerMosaic->getPlayerPatternLines()->getPatternLinesNum(); lineIndex++)
         {
-            for (int i = 0; i < playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->size(); i++)
+            if (playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->isFull())
             {
-                int points = playerMosaic->getPlayerWall()->addTile(playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->removeTile(i), lineIndex, lid);
-                addToPlayerScore(points);
+                for (int i = 0; i < playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->size(); i++)
+                {
+                    int points = playerMosaic->getPlayerWall()->addTile(playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->removeTile(i), lineIndex, lid);
+                    addToPlayerScore(points);
+                }
+            }
+        }
+    }
+    // Wall tilting phase for grey mode
+    else
+    {
+        bool tiltingInstructions = true;
+        for (int lineIndex = 0; lineIndex < playerMosaic->getPlayerPatternLines()->getPatternLinesNum(); lineIndex++)
+        {
+            // TODO
+            if (playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->isFull())
+            {
+                printGreyModeTiltingUI(this, lineIndex, tiltingInstructions);
+                tiltingInstructions = false;
+                bool columnChosen = false;
+                std::string wallColumnAsString;
+                int wallColumn = 0;
+                // TODO: check for EOF, more checks are needed (already has tile, check vertical)
+                while (!columnChosen)
+                {
+                    std::cout << "Wall Column:" << std::endl;
+                    std::cout << ">";
+                    std::cin >> wallColumnAsString;
+                    try
+                    {
+                        wallColumn = std::stoi(wallColumnAsString);
+                    }
+                    catch (std::invalid_argument const &e)
+                    {
+                        std::cout << "Invalid input" << std::endl;
+                    }
+                    catch (std::out_of_range const &e)
+                    {
+                        std::cout << "Integer overflow: std::out_of_range thrown" << std::endl;
+                    }
+                    if (wallColumn >= 0 && wallColumn < playerMosaic->getPlayerWall()->getWallLinesNum()) {
+                        columnChosen = true;
+                    }
+                    else {
+                        std::cout << "Invalid Wall column chosen. Please try again." << std::endl;
+                    }
+                }
+
+                for (int i = 0; i < playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->size(); i++)
+                {
+                    int points = playerMosaic->getPlayerWall()->addTileGreyMode(playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->removeTile(i), lineIndex, columnChosen, lid);
+                    addToPlayerScore(points);
+                }
             }
         }
     }

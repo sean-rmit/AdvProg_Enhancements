@@ -163,7 +163,7 @@ void newGamePage(int playersNum, int centresNum, int seed)
     // take in player names
     for (int i = 0; i < playersNum; i++)
     {
-        std::cout << "Enter a name for player :" << i + 1 << std::endl;
+        std::cout << "Enter a name for player " << i + 1 << ":" << std::endl;
         std::cout << "> ";
         std::string playerName;
         std::cin >> playerName;
@@ -178,10 +178,7 @@ void newGamePage(int playersNum, int centresNum, int seed)
     bool gameOngoing = true;
     std::cout << "Let’s Play!\n"
               << std::endl;
-    std::cout << "== INSTRUCTIONS ==" << std::endl;
-    std::cout << "Make a move: turn <factory index> <tile colour> <patternline index>" << std::endl;
-    std::cout << "Save the game: save" << std::endl;
-    std::cout << "Quit the game: quit" << std::endl;
+    printInstructions(centresNum);
     std::cout << std::endl;
     int turnCounter = 0;
     while (gameOngoing)
@@ -299,23 +296,15 @@ void loadGamePage()
     bool gameOngoing = true;
     int turnCounter = 0;
     int playersNum = 0;
+    int centresNum = 0;
     LoadSave *load = new LoadSave();
     Game *game = load->loadFile(filename, turnCounter);
     playersNum = game->getPlayers()->getPlayersNum();
+    centresNum = game->getFactories()->getCentresNum();
     delete load;
     std::cout << "=== Azul Game Successfully Loaded ===" << std::endl;
-    std::cout << "Let’s Play!\n"
-              << std::endl;
-    std::cout << "== INSTRUCTIONS ==" << std::endl;
-    std::cout << "Make a move: turn <factory index> <tile colour> <patternline index>" << std::endl;
-    std::cout << "Save the game: save" << std::endl;
-    std::cout << "Quit the game: quit\n"
-              << std::endl;
-    std::cout << "== Current Player Progress ==" << std::endl;
-    for (int i = 0; i < playersNum; i++)
-    {
-        printPlayerMosaic(game->getPlayer(i));
-    }
+    std::cout << "Let’s Play!" << std::endl;
+    printInstructions(centresNum);
     std::cout << std::endl;
     bool firstRoundSinceLoad = true;
 
@@ -355,7 +344,7 @@ void loadGamePage()
 
             printFactories(game->getFactories());
             std::cout << std::endl;
-            printPlayerMosaic(game->getPlayer(playerNum));
+            printPlayerMosaics(game->getPlayers());
             bool validMove = false;
             // loop until valid move is made
             while (!validMove)

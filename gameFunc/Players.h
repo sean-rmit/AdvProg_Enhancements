@@ -7,7 +7,7 @@ class Players {
 public:
 
     // Constructor
-    Players(int numPlayers);
+    Players(int numPlayers, bool advMode, bool greyMode);
     // Deconstructor
     ~Players();
 

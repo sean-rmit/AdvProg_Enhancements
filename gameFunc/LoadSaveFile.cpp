@@ -44,16 +44,16 @@ void LoadSave::saveFile(std::string saveFile, Players *players, Factories *facto
     // Players Details
     for (int playerNum = 0; playerNum < players->getPlayersNum(); playerNum++)
     {
-        saveToFile << "PLAYER_" << playerNum + 1 << "_NAME=" << players->getPlayer(playerNum)->getPlayerName() << std::endl;
-        saveToFile << "PLAYER_" << playerNum + 1 << "_SCORE=" << players->getPlayer(playerNum)->getPlayerScore() << std::endl;
+        saveToFile << "PLAYER_" << playerNum << "_NAME=" << players->getPlayer(playerNum)->getPlayerName() << std::endl;
+        saveToFile << "PLAYER_" << playerNum << "_SCORE=" << players->getPlayer(playerNum)->getPlayerScore() << std::endl;
         for (int i = 0; i < 5; i++)
         {
-            saveToFile << "PLAYER_" << playerNum + 1 << "_PATTERN_LINE" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
+            saveToFile << "PLAYER_" << playerNum << "_PATTERN_LINE" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
         }
-        saveToFile << "PLAYER_" << playerNum + 1 << "_FLOOR_LINE=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
+        saveToFile << "PLAYER_" << playerNum << "_FLOOR_LINE=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
         for (int i = 0; i < 5; i++)
         {
-            saveToFile << "PLAYER_" << playerNum + 1 << "_MOSAIC_" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+            saveToFile << "PLAYER_" << playerNum << "_MOSAIC_" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
         }
     }
 
@@ -87,13 +87,13 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
     std::ifstream savedFile(loadFile);
 
     // while loop to read everything
+    // bool playersAndFactoriesCreated = false;
     std::string line;
+    int playersNum = 0;
+    int centresNum = 0;
     while (getline(savedFile, line))
     {
         std::string data;
-        int k, dl;
-        int playersNum = 0;
-        int centresNum = 0;
 
         // number of players
         if (line.find("NUMBER_OF_PLAYERS") != std::string::npos)
@@ -101,10 +101,15 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
             getData(line, data);
 
             // Splitting data into individual characters
-            dl = data.length();
-            for (k = 0; k < dl; k++)
+            // dl = data.length();
+            try
             {
-                playersNum = (int)data[k];
+                playersNum = std::stoi(data);
+                std::cout << "DEBUG: Number of players: " << playersNum << std::endl;
+            }
+            catch (std::invalid_argument const &e)
+            {
+                std::cout << "Invalid number of players from save file." << std::endl;
             }
         }
 
@@ -114,15 +119,26 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
             getData(line, data);
 
             // Splitting data into individual characters
-            dl = data.length();
-            for (k = 0; k < dl; k++)
+            // dl = data.length();
+            try
             {
-                centresNum = (int)data[k];
+                centresNum = std::stoi(data);
+            }
+            catch (std::invalid_argument const &e)
+            {
+                std::cout << "Invalid number of centres from save file." << std::endl;
             }
         }
+    }
+    std::cout << "DEBUG: createFactoriesAndPlayers(): " << playersNum << "," << centresNum << std::endl;
+    game->createFactoriesAndPlayers(playersNum, centresNum);
 
-        // instantiate game object
-        game = new Game(playersNum, centresNum, 0);
+    // Reading file in
+    std::ifstream savedFile2(loadFile);
+    while (getline(savedFile2, line))
+    {
+        std::string data;
+        int k, dl;
 
         /* FACTORIES */
         // Finding keyword line
@@ -162,7 +178,7 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                     char tile = data[k];
                     if (tile != 'F')
                     {
-                        
+
                         game->getFactories()->getCentre(i)->addTile(tile);
                     }
                     else if (tile == 'F')

@@ -3,109 +3,149 @@
 #include <exception>
 #include <iostream>
 
-Bag::Bag() {
+Bag::Bag()
+{
     bag = new LinkedList();
     bag->head = nullptr;
 }
 
-Bag::~Bag() {
+Bag::~Bag()
+{
     clearBag();
 }
 
-Bag::Bag(Bag& other) {
-
+Bag::Bag(Bag &other)
+{
 }
 
-unsigned int Bag::size() {
-    Node* current = bag->head;
+unsigned int Bag::size()
+{
+    Node *current = bag->head;
     int length = 0;
-    while (current != nullptr) {
+    while (current != nullptr)
+    {
         ++length;
         current = current->next;
     }
     return length;
 }
 
-void Bag::addTileToBack(char tile) {
-    Node* newTile = new Node();
+void Bag::addTileToBack(char tile)
+{
+    Node *newTile = new Node();
     newTile->tile = tile;
     newTile->next = nullptr;
 
-    if (bag->head == nullptr) {
+    if (bag->head == nullptr)
+    {
         bag->head = newTile;
-    } else {
-        Node* current = bag->head;
-        while (current->next != nullptr) {
+    }
+    else
+    {
+        Node *current = bag->head;
+        while (current->next != nullptr)
+        {
             current = current->next;
         }
         current->next = newTile;
     }
 }
 
-char Bag::removeTileFront() {
-    if (bag->head != nullptr) {
-        Node* toRemove = bag->head;
+char Bag::removeTileFront()
+{
+    if (bag->head != nullptr)
+    {
+        Node *toRemove = bag->head;
         bag->head = bag->head->next;
         char tile = toRemove->tile;
         delete toRemove;
         return tile;
-    } else {
+    }
+    else
+    {
         throw std::logic_error("Deleting on empty tilebag");
     }
 }
 
-void Bag::clearBag() {
-    while (bag->head != nullptr) {
+void Bag::clearBag()
+{
+    while (bag->head != nullptr)
+    {
         removeTileFront();
     }
 }
 
-std::string Bag::getTilesAsString() {
+std::string Bag::getTilesAsString()
+{
     std::string allTilesAsString;
-    Node* current = bag->head;
-    while (current != nullptr) {
+    Node *current = bag->head;
+    while (current != nullptr)
+    {
         allTilesAsString += current->tile;
         current = current->next;
     }
     return allTilesAsString;
 }
 
-void Bag::fillBagWithTiles(int seed) {
+void Bag::fillBagWithTiles(int seed, bool advMode)
+{
     // temporary vector to fill up the TileBag
     std::vector<char> tempVector;
 
     // fill tempVector with red tiles
-    for (int i = 0; i < RED_TILES_NUM; i++) {
+    for (int i = 0; i < RED_TILES_NUM; i++)
+    {
         tempVector.push_back(RED);
     }
     // fill tempVector with yellow tiles
-    for (int i = 0; i < YELLOW_TILES_NUM; i++) {
+    for (int i = 0; i < YELLOW_TILES_NUM; i++)
+    {
         tempVector.push_back(YELLOW);
     }
     // fill tempVector with dark blue tiles
-    for (int i = 0; i < DARKBLUE_TILES_NUM; i++) {
+    for (int i = 0; i < DARKBLUE_TILES_NUM; i++)
+    {
         tempVector.push_back(DARKBLUE);
     }
     // fill tempVector with light blue tiles
-    for (int i = 0; i < LIGHTBLUE_TILES_NUM; i++) {
+    for (int i = 0; i < LIGHTBLUE_TILES_NUM; i++)
+    {
         tempVector.push_back(LIGHTBLUE);
     }
     // fill tempVector with black tiles
-    for (int i = 0; i < BLACK_TILES_NUM; i++) {
+    for (int i = 0; i < BLACK_TILES_NUM; i++)
+    {
         tempVector.push_back(BLACK);
+    }
+    // fill tempVector with orange tiles if it is advanced mode
+    if (advMode)
+    {
+        for (int i = 0; i < ORANGE_TILES_NUM; i++)
+        {
+            tempVector.push_back(ORANGE);
+        }
     }
 
     /* 
      *Shuffling TileBag by inserting from random tempVector positions into the TileBag
      *Reduce max index of tempVector by 1 every loop to adjust according to tempVector's size
      */
-    int minIndex = 0; // min index of tempVector
-    int maxIndex = 99; // max index of tempVector
+    int tileBagSize = 0;
+    if (advMode) {
+        tileBagSize = ADV_TILEBAG_SIZE;
+    }
+    else {
+        tileBagSize = NORMAL_TILEBAG_SIZE;
+    }
+    int minIndex = 0;   // min index of tempVector
+    int maxIndex = tileBagSize - 1;  // max index of tempVector
     int RandIndex = -1; // random index generated
     // checks if a seed is provided, default seed value = 0 means no seed is provided
-    if (seed == 0) {
+    if (seed == 0)
+    {
         std::random_device engine;
-        for (int i = 0; i < TILEBAG_SIZE; i++) {
+        for (int i = 0; i < tileBagSize; i++)
+        {
             std::uniform_int_distribution<int> uniform_dist(minIndex, maxIndex);
             RandIndex = uniform_dist(engine);
             // tile added from tempVector to TileBag
@@ -116,9 +156,11 @@ void Bag::fillBagWithTiles(int seed) {
         }
     }
     // if a seed is provided, the seed will be used
-    else {
+    else
+    {
         std::default_random_engine engine(seed);
-        for (int i = 0; i < TILEBAG_SIZE; i++) {
+        for (int i = 0; i < tileBagSize; i++)
+        {
             std::uniform_int_distribution<int> uniform_dist(minIndex, maxIndex);
             RandIndex = uniform_dist(engine);
             // tile added from tempVector to TileBag

@@ -9,7 +9,8 @@
 #include <vector>
 #include <random>
 
-#define TILEBAG_SIZE 100
+#define NORMAL_TILEBAG_SIZE 100
+#define ADV_TILEBAG_SIZE    120
 
 class Bag {
 public:
@@ -33,7 +34,7 @@ public:
     void clearBag();
 
     // fill bag with tiles of random order, seed = 0 is assumed as no seed value given
-    void fillBagWithTiles(int seed);
+    void fillBagWithTiles(int seed, bool advMode);
 
     // print tiles contained in linked list of bag
     std::string getTilesAsString();

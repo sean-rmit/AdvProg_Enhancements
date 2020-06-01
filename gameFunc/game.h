@@ -12,11 +12,14 @@ class Game {
 public:
 
     Game();
-    Game(int playersNum, int centresNum, int seed);
+    Game(int playersNum, int centresNum, bool advMode, bool greyMode, int seed);
     ~Game();
 
     // copy constructor
     Game(Game& other);
+
+    // To instantiate the needed number of players, factories and centres
+    void createFactoriesAndPlayers(int playersNum, int centresNum, bool advMode, bool greyMode);
 
     // Called after round ends, moves tiles and calculates points
     void finaliseRound();
@@ -53,6 +56,12 @@ private:
     Lid *lid;
     Bag *bag;
     bool twoCentres;
+    // needed to determine who gets the F token in a two-centre game
+    bool firstplayerTokenTaken;
+    
+    // boolean for advanced mode (6th column & orange tile) and grey mode (blank wall)
+    bool advMode;
+    bool greyMode;
 };
 
 typedef Game* gamePtr;

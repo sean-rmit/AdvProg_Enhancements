@@ -12,6 +12,20 @@ void printString(std::string s, int num)
     }
 }
 
+void printInstructions(int numCentres)
+{
+    std::cout << "== INSTRUCTIONS ==" << std::endl;
+    // if (numCentres == 1) {
+
+    // }
+    // else if (numCentres == 2) {
+    //     std::cout << "Make a move: turn <Factory Tndex> <Tile Colour> <PatternLine Index> <Target Centre>" << std::endl;
+    // }
+    std::cout << "Make a move: turn <Factory Tndex> <Tile Colour> <Patternline Index>" << std::endl;
+    std::cout << "Save the game: save" << std::endl;
+    std::cout << "Quit the game: quit" << std::endl;
+}
+
 void printFactories(Factories *factories)
 {
     std::cout << "Factories:" << std::endl;
@@ -28,22 +42,22 @@ void printFactories(Factories *factories)
     printString("=", 15);
 }
 
-void printPlayerMosaic(Player *player)
-{
-    std::cout << "Mosaic for " << player->getPlayerName() << " :" << std::endl;
-    for (int i = 0; i < PATTERN_LINES_NUM; i++)
-    {
-        std::cout << i + 1 << ": ";
-        for (int j = 0; j < PATTERN_LINES_NUM - i; j++)
-        {
-            std::cout << " ";
-        }
-        std::cout << player->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true);
-        std::cout << " || ";
-        std::cout << player->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
-    }
-    std::cout << "6: broken: " << player->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
-}
+// void printPlayerMosaic(Player *player)
+// {
+//     std::cout << "Mosaic for " << player->getPlayerName() << " :" << std::endl;
+//     for (int i = 0; i < PATTERN_LINES_NUM; i++)
+//     {
+//         std::cout << i + 1 << ": ";
+//         for (int j = 0; j < PATTERN_LINES_NUM - i; j++)
+//         {
+//             std::cout << " ";
+//         }
+//         std::cout << player->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true);
+//         std::cout << " || ";
+//         std::cout << player->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+//     }
+//     std::cout << "6: broken: " << player->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
+// }
 
 void printPlayerMosaics(Players *players)
 {
@@ -60,12 +74,13 @@ void printPlayerMosaics(Players *players)
 
     // print players mosaic lines
     int spacesNeeded = GAP_SIZE;
-    for (int i = 0; i < PATTERN_LINES_NUM; i++)
+    int patternLinesNum = players->getPlayer(0)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum();
+    for (int i = 0; i < patternLinesNum; i++)
     {
         for (int playerNum = 0; playerNum < players->getPlayersNum(); playerNum++)
         {
             std::cout << i + 1 << ": ";
-            for (int j = 0; j < PATTERN_LINES_NUM - i; j++)
+            for (int j = 0; j < patternLinesNum - i; j++)
             {
                 std::cout << " ";
             }
@@ -89,5 +104,41 @@ void printPlayerPoints(Players *players)
     for (int i = 0; i < players->getPlayersNum(); i++)
     {
         std::cout << players->getPlayer(i)->getPlayerName() << "'s score: " << players->getPlayer(i)->getPlayerScore() << std::endl;
+    }
+}
+
+void printGreyModeTiltingUI(Player *player, int patternLineIndex, bool instructions)
+{
+    if (instructions)
+    {
+        std::cout << "Wall Tilting Phase - Player: " << player->getPlayerName() << std::endl;
+        std::cout << "Choose the column index of your wall you would like to place your tile" << std::endl;
+        std::cout << "for the targeted line index with symbol '>>'" << std::endl;
+    }
+
+    printString(" ", player->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 3);
+    for (int i = 0; i < player->getPlayerMosaic()->getPlayerWall()->getWallLinesNum(); i++)
+    {
+        std::cout << i << " " << std::endl;
+    }
+
+    for (int i = 0; i < player->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum(); i++)
+    {
+        if (i == patternLineIndex)
+        {
+            std::cout << ">>";
+        }
+        else
+        {
+            std::cout << "  ";
+        }
+        std::cout << i + 1 << ": ";
+        for (int j = 0; j < player->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() - i; j++)
+        {
+            std::cout << " ";
+        }
+        std::cout << player->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true);
+        std::cout << " || ";
+        std::cout << player->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
     }
 }

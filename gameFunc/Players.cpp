@@ -3,12 +3,12 @@
 #include <string>
 #include <exception>
 
-Players::Players(int numPlayers) {
+Players::Players(int numPlayers, bool advMode, bool greyMode) {
     this->playersNum = numPlayers;
     players = new playerPtr[playersNum];
     for (int i = 0; i < numPlayers; i++)
     {
-        Player *player = new Player();
+        Player *player = new Player(advMode, greyMode);
         players[i] = player;
     }
 }

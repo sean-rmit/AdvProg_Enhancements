@@ -1,19 +1,32 @@
 #include "Wall.h"
 
-Wall::Wall()
+Wall::Wall(bool advMode, bool greyMode)
 {
-    wallLines = new linePtr[WALL_LINES_NUM];
-    for (int i = 0; i < WALL_LINES_NUM; i++)
+    this->advMode = advMode;
+    this->greyMode = greyMode;
+    if (!advMode)
     {
-        Line *line = new Line(5);
+        wallLinesNum = NORMAL_WALL_LINES_NUM;
+    }
+    else
+    {
+        wallLinesNum = ADV_WALL_LINES_NUM;
+    }
+    wallLines = new linePtr[wallLinesNum];
+    for (int i = 0; i < wallLinesNum; i++)
+    {
+        Line *line = new Line(wallLinesNum);
         wallLines[i] = line;
     }
-    initialiseFixedColourPattern();
+    if (!greyMode)
+    {
+        initialiseFixedColourPattern();
+    }
 }
 
 Wall::~Wall()
 {
-    for (int i = 0; i < WALL_LINES_NUM; i++)
+    for (int i = 0; i < wallLinesNum; i++)
     {
         delete wallLines[i];
     }
@@ -27,15 +40,29 @@ Wall::Wall(Wall &other)
 void Wall::initialiseFixedColourPattern()
 {
     // read in from an fixedWallPatternTiles.txt file
-    std::string filename = "fixedWallPatternTiles.txt";
-    std::ifstream inputFile(filename);
-    for (int i = 0; i < WALL_LINES_NUM; i++)
+    std::string filename;
+    if (advMode)
     {
-        for (int j = 0; j < WALL_LINES_NUM; j++)
+        filename = "fixedWallPatternTilesAdv.txt";
+    }
+    else
+    {
+        filename = "fixedWallPatternTiles.txt";
+    }
+
+    std::ifstream inputFile(filename);
+    for (int i = 0; i < wallLinesNum; i++)
+    {
+        for (int j = 0; j < wallLinesNum; j++)
         {
             inputFile >> fixedColourPattern[i][j];
         }
     }
+}
+
+int Wall::getWallLinesNum()
+{
+    return this->wallLinesNum;
 }
 
 linePtr Wall::getLine(int index)
@@ -46,7 +73,7 @@ linePtr Wall::getLine(int index)
 int Wall::addTile(char tile, int lineIndex, Lid *lid)
 {
     int points = 0;
-    for (int i = 0; i < WALL_LINES_NUM; i++)
+    for (int i = 0; i < wallLinesNum; i++)
     {
         if (fixedColourPattern[lineIndex][i] == tile)
         {
@@ -61,7 +88,7 @@ int Wall::addTile(char tile, int lineIndex, Lid *lid)
                 int col = i;
 
                 // check row
-                while (col + 1 < WALL_LINES_NUM && wallLines[row]->hasTile(col + 1))
+                while (col + 1 < wallLinesNum && wallLines[row]->hasTile(col + 1))
                 {
                     adjacentTilesOnRow++;
                     col++;
@@ -74,13 +101,13 @@ int Wall::addTile(char tile, int lineIndex, Lid *lid)
                 }
                 col = i;
                 // check column
-                while (row + 1 < WALL_LINES_NUM && wallLines[row + 1]->hasTile(col))
+                while (row + 1 < wallLinesNum && wallLines[row + 1]->hasTile(col))
                 {
                     adjacentTilesOnCol++;
                     row++;
                 }
                 row = lineIndex;
-                while (row-1 >= 0 && wallLines[row - 1]->hasTile(col))
+                while (row - 1 >= 0 && wallLines[row - 1]->hasTile(col))
                 {
                     adjacentTilesOnCol++;
                     row--;
@@ -108,6 +135,65 @@ int Wall::addTile(char tile, int lineIndex, Lid *lid)
     return points;
 }
 
+int Wall::addTileGreyMode(char tile, int lineIndex, int wallColumn, Lid *lid)
+{
+    int points = 0;
+    if (!wallLines[lineIndex]->hasTile(wallColumn))
+    {
+        wallLines[lineIndex]->addTileToIndex(tile, wallColumn);
+
+        // scoring implementation
+        int adjacentTilesOnRow = 0;
+        int adjacentTilesOnCol = 0;
+        int row = lineIndex;
+        int col = wallColumn;
+
+        // check row
+        while (col + 1 < wallLinesNum && wallLines[row]->hasTile(col + 1))
+        {
+            adjacentTilesOnRow++;
+            col++;
+        }
+        col = wallColumn;
+        while (col - 1 >= 0 && wallLines[row]->hasTile(col - 1))
+        {
+            adjacentTilesOnRow++;
+            col--;
+        }
+        col = wallColumn;
+        // check column
+        while (row + 1 < wallLinesNum && wallLines[row + 1]->hasTile(col))
+        {
+            adjacentTilesOnCol++;
+            row++;
+        }
+        row = lineIndex;
+        while (row - 1 >= 0 && wallLines[row - 1]->hasTile(col))
+        {
+            adjacentTilesOnCol++;
+            row--;
+        }
+        if (adjacentTilesOnRow != 0)
+        {
+            points += adjacentTilesOnRow + 1;
+        }
+        if (adjacentTilesOnCol != 0)
+        {
+            points += adjacentTilesOnCol + 1;
+        }
+        if (adjacentTilesOnCol == 0 && adjacentTilesOnRow == 0)
+        {
+            points = 1;
+        }
+        // end of scoring implementation
+    }
+    else
+    {
+        lid->addTileToBack(tile);
+    }
+    return points;
+}
+
 int Wall::addEndGameBonusPoints()
 {
     int points = 0;
@@ -116,7 +202,7 @@ int Wall::addEndGameBonusPoints()
     int completedColours = 0;
 
     // count completed rows
-    for (int rowIndex = 0; rowIndex < WALL_LINES_NUM; rowIndex++)
+    for (int rowIndex = 0; rowIndex < wallLinesNum; rowIndex++)
     {
         if (wallLines[rowIndex]->isFull())
         {
@@ -125,17 +211,17 @@ int Wall::addEndGameBonusPoints()
     }
 
     // count completed columns
-    for (int colIndex = 0; colIndex < WALL_LINES_NUM; colIndex++)
+    for (int colIndex = 0; colIndex < wallLinesNum; colIndex++)
     {
         int counter = 0;
-        for (int rowIndex = 0; rowIndex < WALL_LINES_NUM; rowIndex++)
+        for (int rowIndex = 0; rowIndex < wallLinesNum; rowIndex++)
         {
             if (wallLines[rowIndex]->hasTile(colIndex))
             {
                 counter++;
             }
         }
-        if (counter == 5)
+        if (counter == wallLinesNum)
         {
             completedCols++;
         }
@@ -144,10 +230,10 @@ int Wall::addEndGameBonusPoints()
 
     // count complete colours
     char tile;
-    int red = 0, yellow = 0, lightBlue = 0, darkBlue = 0, black = 0;
-    for (int rowIndex = 0; rowIndex < WALL_LINES_NUM; rowIndex++)
+    int red = 0, yellow = 0, lightBlue = 0, darkBlue = 0, black = 0, orange = 0;
+    for (int rowIndex = 0; rowIndex < wallLinesNum; rowIndex++)
     {
-        for (int colIndex = 0; colIndex < WALL_LINES_NUM; colIndex++)
+        for (int colIndex = 0; colIndex < wallLinesNum; colIndex++)
         {
             tile = wallLines[rowIndex]->getTileColour(colIndex);
             if (tile == RED)
@@ -170,25 +256,33 @@ int Wall::addEndGameBonusPoints()
             {
                 black++;
             }
+            else if (tile == ORANGE)
+            {
+                orange++;
+            }
         }
     }
-    if (red == 5)
+    if (red == wallLinesNum)
     {
         completedColours++;
     }
-    if (yellow == 5)
+    if (yellow == wallLinesNum)
     {
         completedColours++;
     }
-    if (black == 5)
+    if (black == wallLinesNum)
     {
         completedColours++;
     }
-    if (darkBlue == 5)
+    if (darkBlue == wallLinesNum)
     {
         completedColours++;
     }
-    if (lightBlue == 5)
+    if (lightBlue == wallLinesNum)
+    {
+        completedColours++;
+    }
+    if (orange == wallLinesNum)
     {
         completedColours++;
     }
