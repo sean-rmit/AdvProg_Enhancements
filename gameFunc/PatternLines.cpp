@@ -29,8 +29,8 @@ PatternLines::~PatternLines()
     delete patternLines;
 }
 
-PatternLines::PatternLines(PatternLines &other) : PatternLines()
-{
+int PatternLines::getPatternLinesNum() {
+    return patternLinesNum;
 }
 
 linePtr PatternLines::getLine(int index)

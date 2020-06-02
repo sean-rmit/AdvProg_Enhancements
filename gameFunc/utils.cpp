@@ -29,7 +29,7 @@ void printInstructions(int numCentres)
 void printFactories(Factories *factories)
 {
     std::cout << "Factories:" << std::endl;
-    printString("=", 15);
+    printString("=", 20);
     std::cout << std::endl;
     for (int i = 0; i < factories->getCentresNum(); i++)
     {
@@ -37,9 +37,14 @@ void printFactories(Factories *factories)
     }
     for (int i = 0; i < factories->getFactoriesNum(); i++)
     {
-        std::cout << i + factories->getCentresNum() << " - Factory: " << factories->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
+        std::cout << i + factories->getCentresNum();
+        if (i + factories->getCentresNum() < 10) {
+            std::cout << " ";
+        }
+        std::cout << "- Factory: ";
+        std::cout << factories->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
     }
-    printString("=", 15);
+    printString("=", 20);
 }
 
 // void printPlayerMosaic(Player *player)
@@ -116,7 +121,7 @@ void printGreyModeTiltingUI(Player *player, int patternLineIndex, bool instructi
         std::cout << "for the targeted line index with symbol '>>'" << std::endl;
     }
 
-    printString(" ", player->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 3);
+    printString(" ", player->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 10);
     for (int i = 0; i < player->getPlayerMosaic()->getPlayerWall()->getWallLinesNum(); i++)
     {
         std::cout << i << " " << std::endl;
@@ -141,4 +146,30 @@ void printGreyModeTiltingUI(Player *player, int patternLineIndex, bool instructi
         std::cout << " || ";
         std::cout << player->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
     }
+}
+
+void printAdvModePrompt() {
+    std::cout << "Option A: Normal Mode" << std::endl;
+    printString("=", 20);
+    std::cout << std::endl;
+    std::cout << "Play azul with a 5x5 mosaic wall" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Option B: Advanced Mode" << std::endl;
+    printString("=", 20);
+    std::cout << std::endl;
+    std::cout << "Play azul with a 6x6 mosaic wall, which includes the additional tile colour Orange" << std::endl;
+    std::cout << "Enter A(Normal) or B(Advaned):" << std::endl;
+}
+
+void printGreyModePrompt() {
+    std::cout << "Option A: Fixed Wall Mode" << std::endl;
+    printString("=", 20);
+    std::cout << std::endl;
+    std::cout << "Play azul with a mosaic wall with fixed colour positions" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Option B: Grey Mode" << std::endl;
+    printString("=", 20);
+    std::cout << std::endl;
+    std::cout << "Play azul with an unfixed mosaic wall. Design your own mosaic wall!" << std::endl;
+    std::cout << "Enter A(Fixed) or B(Grey):" << std::endl;
 }

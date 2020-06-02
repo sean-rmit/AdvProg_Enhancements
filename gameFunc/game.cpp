@@ -51,6 +51,8 @@ void Game::createFactoriesAndPlayers(int playersNum, int centresNum, bool advMod
     {
         twoCentres = true;
     }
+    this->advMode = advMode;
+    this->greyMode = greyMode;
 }
 
 void Game::finaliseRound()
@@ -154,8 +156,7 @@ bool Game::playerMakesMove(int playerNum)
     }
 
     // validate factoryNum
-    // factories->getFactoriesNum() + 1 because centre is included
-    if (factoryNum < 0 || factoryNum >= factories->getFactoriesNum() + 1)
+    if (factoryNum < 0 || factoryNum >= factories->getFactoriesNum() + factories->getCentresNum())
     {
         std::cout << "Invalid factoryNum!" << std::endl;
         return false;
@@ -164,8 +165,13 @@ bool Game::playerMakesMove(int playerNum)
     //validate tileColour
     if (tileColour != RED && tileColour != YELLOW && tileColour != DARKBLUE && tileColour != LIGHTBLUE && tileColour != BLACK)
     {
-        std::cout << "Invalid tileColour!" << std::endl;
-        return false;
+        if (advMode && tileColour == ORANGE) {
+            
+        }
+        else {
+            std::cout << "Invalid tileColour!" << std::endl;
+            return false;
+        }
     }
 
     // validate patternlineIndex
@@ -329,6 +335,10 @@ void Game::finaliseGame()
 }
 
 // getters and setters
+void Game::setFirstPlayerTokenTaken(bool taken) {
+    this->firstplayerTokenTaken = taken;
+}
+
 factoriesPtr Game::getFactories()
 {
     return this->factories;
@@ -339,11 +349,6 @@ playersPtr Game::getPlayers()
     return this->players;
 }
 
-playerPtr Game::getPlayer(int index)
-{
-    return this->players->getPlayer(index);
-}
-
 lidPtr Game::getLid()
 {
     return this->lid;
@@ -352,4 +357,18 @@ lidPtr Game::getLid()
 bagPtr Game::getBag()
 {
     return this->bag;
+}
+
+bool Game::isAdvMode()
+{
+    return this->advMode;
+}
+
+bool Game::isGreyMode()
+{
+    return this->greyMode;
+}
+
+bool Game::isFirstPlayerTokenTaken() {
+    return this->firstplayerTokenTaken;
 }

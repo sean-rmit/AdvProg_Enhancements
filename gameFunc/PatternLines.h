@@ -17,9 +17,6 @@ public:
     // Deconstructor
     ~PatternLines();
 
-    // Copy constructor
-    PatternLines(PatternLines& other);
-
     // getter for patternLinesNum
     int getPatternLinesNum();
 

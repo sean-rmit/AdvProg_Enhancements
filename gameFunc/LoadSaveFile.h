@@ -14,7 +14,7 @@ public:
     LoadSave(LoadSave& other);
 
     // function to manage saving files
-    void saveFile(std::string saveFile, Players *players, Factories *factories, Bag *bag, Lid *lid, int currentPlayer);
+    void saveFile(std::string saveFile, Game *game, int currentPlayer);
 
     // function to manage loading files
     gamePtr loadFile(std::string loadFile, int &currentPlayer);

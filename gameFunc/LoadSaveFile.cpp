@@ -15,50 +15,54 @@ LoadSave::LoadSave(LoadSave &other)
 {
 }
 
-void LoadSave::saveFile(std::string saveFile, Players *players, Factories *factories, Bag *bag, Lid *lid, int currentPlayer)
+void LoadSave::saveFile(std::string saveFile, Game *game, int currentPlayer)
 {
     std::ofstream saveToFile(saveFile);
 
+    // Advanced mode and Grey mode
+    saveToFile << "ADV_MODE=" << game->isAdvMode() << std::endl;
+    saveToFile << "GREY_MODE=" << game->isGreyMode() << std::endl;
+
     // Number of players
-    saveToFile << "NUMBER_OF_PLAYERS=" << players->getPlayersNum() << std::endl;
+    saveToFile << "NUMBER_OF_PLAYERS=" << game->getPlayers()->getPlayersNum() << std::endl;
 
     // Number of centres
-    saveToFile << "NUMBER_OF_CENTRES=" << factories->getCentresNum() << std::endl;
+    saveToFile << "NUMBER_OF_CENTRES=" << game->getFactories()->getCentresNum() << std::endl;
 
     // Bag
-    saveToFile << "BAG=" << bag->getTilesAsString() << std::endl;
+    saveToFile << "BAG=" << game->getBag()->getTilesAsString() << std::endl;
 
     // Lid
-    saveToFile << "LID=" << lid->getTilesAsString() << std::endl;
+    saveToFile << "LID=" << game->getLid()->getTilesAsString() << std::endl;
 
     // Factory Details
-    for (int i = 0; i < factories->getCentresNum(); i++)
+    for (int i = 0; i < game->getFactories()->getCentresNum(); i++)
     {
-        saveToFile << "FACTORY_CENTRE_" << i << "=" << factories->getCentre(i)->getTilesAsString() << std::endl;
+        saveToFile << "FACTORY_CENTRE_" << i << "=" << game->getFactories()->getCentre(i)->getTilesAsString() << std::endl;
     }
-    for (int i = 0; i < factories->getFactoriesNum(); i++)
+    for (int i = 0; i < game->getFactories()->getFactoriesNum(); i++)
     {
-        saveToFile << "FACTORY_" << i << "=" << factories->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
+        saveToFile << "FACTORY_" << i << "=" << game->getFactories()->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
     }
 
     // Players Details
-    for (int playerNum = 0; playerNum < players->getPlayersNum(); playerNum++)
+    for (int playerNum = 0; playerNum < game->getPlayers()->getPlayersNum(); playerNum++)
     {
-        saveToFile << "PLAYER_" << playerNum << "_NAME=" << players->getPlayer(playerNum)->getPlayerName() << std::endl;
-        saveToFile << "PLAYER_" << playerNum << "_SCORE=" << players->getPlayer(playerNum)->getPlayerScore() << std::endl;
+        saveToFile << "PLAYER_" << playerNum << "_NAME=" << game->getPlayers()->getPlayer(playerNum)->getPlayerName() << std::endl;
+        saveToFile << "PLAYER_" << playerNum << "_SCORE=" << game->getPlayers()->getPlayer(playerNum)->getPlayerScore() << std::endl;
         for (int i = 0; i < 5; i++)
         {
-            saveToFile << "PLAYER_" << playerNum << "_PATTERN_LINE" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
+            saveToFile << "PLAYER_" << playerNum << "_PATTERN_LINE" << i << "=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
         }
-        saveToFile << "PLAYER_" << playerNum << "_FLOOR_LINE=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
+        saveToFile << "PLAYER_" << playerNum << "_FLOOR_LINE=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
         for (int i = 0; i < 5; i++)
         {
-            saveToFile << "PLAYER_" << playerNum << "_MOSAIC_" << i << "=" << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+            saveToFile << "PLAYER_" << playerNum << "_MOSAIC_" << i << "=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
         }
     }
 
     // Current Player to make a move
-    saveToFile << "CURRENT_PLAYER=" << currentPlayer % players->getPlayersNum() << std::endl;
+    saveToFile << "CURRENT_PLAYER=" << currentPlayer % game->getPlayers()->getPlayersNum() << std::endl;
 }
 
 gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
@@ -91,9 +95,45 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
     std::string line;
     int playersNum = 0;
     int centresNum = 0;
+    bool advMode = false;
+    bool greyMode = false;
     while (getline(savedFile, line))
     {
         std::string data;
+
+        // Advanced Mode boolean
+        if (line.find("ADV_MODE") != std::string::npos)
+        {
+            getData(line, data);
+
+            // Splitting data into individual characters
+            // dl = data.length();
+            try
+            {
+                advMode = std::stoi(data);
+            }
+            catch (std::invalid_argument const &e)
+            {
+                std::cout << "Invalid adv mode boolean from save file." << std::endl;
+            }
+        }
+
+        // Grey Mode boolean
+        if (line.find("GREY_MODE") != std::string::npos)
+        {
+            getData(line, data);
+
+            // Splitting data into individual characters
+            // dl = data.length();
+            try
+            {
+                greyMode = std::stoi(data);
+            }
+            catch (std::invalid_argument const &e)
+            {
+                std::cout << "Invalid grey mode boolean from save file." << std::endl;
+            }
+        }
 
         // number of players
         if (line.find("NUMBER_OF_PLAYERS") != std::string::npos)
@@ -131,7 +171,7 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
         }
     }
     std::cout << "DEBUG: createFactoriesAndPlayers(): " << playersNum << "," << centresNum << std::endl;
-    game->createFactoriesAndPlayers(playersNum, centresNum);
+    game->createFactoriesAndPlayers(playersNum, centresNum, advMode, greyMode);
 
     // Reading file in
     std::ifstream savedFile2(loadFile);
@@ -212,13 +252,13 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
             if (line.find("PLAYER_" + playerNumAsString + "_NAME") != std::string::npos)
             {
                 getData(line, data);
-                game->getPlayer(playerNum)->setPlayerName(data);
+                game->getPlayers()->getPlayer(playerNum)->setPlayerName(data);
             }
 
             if (line.find("PLAYER_" + playerNumAsString + "_SCORE") != std::string::npos)
             {
                 getData(line, data);
-                game->getPlayer(playerNum)->setPlayerScore(stoi(data));
+                game->getPlayers()->getPlayer(playerNum)->setPlayerScore(stoi(data));
             }
 
             for (int i = 0; i < 5; i++)
@@ -234,11 +274,11 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                     {
                         if (data[k] == NOTILE)
                         {
-                            game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->removeTile(i);
+                            game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->removeTile(i);
                         }
                         else
                         {
-                            game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->addTileToBack(data[k]);
+                            game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->addTileToBack(data[k]);
                         }
                     }
                 }
@@ -253,7 +293,11 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                 {
                     if (data[k] != NOTILE)
                     {
-                        game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->addTileToBack(data[k]);
+                        game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->addTileToBack(data[k]);
+                    }
+                    if (data[k] == FIRSTPLAYER) {
+                        std::cout << "game->setFirstPlayerTokenTaken(true);" << std::endl;
+                        game->setFirstPlayerTokenTaken(true);
                     }
                 }
             }
@@ -269,10 +313,10 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                     dl = data.length();
                     for (k = 0; k < dl; k++)
                     {
-                        game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->addTileToIndex(data[k], k);
+                        game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->addTileToIndex(data[k], k);
                         if (data[k] == NOTILE || data[k] == '.')
                         {
-                            game->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->removeTile(k);
+                            game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->removeTile(k);
                         }
                     }
                 }

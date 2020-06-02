@@ -14,6 +14,7 @@ void printFactories(Factories *factories);
 void printPlayerMosaics(Players *players);
 void printPlayerPoints(Players *players);
 void printGreyModeTiltingUI(Player *player, int patternLineIndex, bool instructions);
-
+void printAdvModePrompt();
+void printGreyModePrompt();
 
 #endif // UTILS_H

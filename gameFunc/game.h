@@ -3,6 +3,7 @@
 
 #include "Factories.h"
 #include "Players.h"
+#include "Player.h"
 #include "BoxLid.h"
 #include "TileBag.h"
 
@@ -44,11 +45,15 @@ public:
     // Called after a loaded game has ended. Does not calculate bonus points
     void finaliseLoadedGame();
 
+    // getters setters
+    void setFirstPlayerTokenTaken(bool taken);
     factoriesPtr getFactories();
     playersPtr getPlayers();
-    playerPtr getPlayer(int index);
     lidPtr getLid();
     bagPtr getBag();
+    bool isAdvMode();
+    bool isGreyMode();
+    bool isFirstPlayerTokenTaken();
 
 private:
     Factories *factories;

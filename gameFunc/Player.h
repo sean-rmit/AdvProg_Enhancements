@@ -5,7 +5,7 @@
 #include "Factory.h"
 #include "Centre.h"
 #include "Line.h"
-#include "utils.h"
+#include "BoxLid.h"
 
 class Player {
 public:
@@ -32,6 +32,8 @@ public:
 
     void addPenaltyPoints();
     void addEndGameBonusPoints();
+
+    void printGreyModeTiltingUI(int patternLineIndex, bool instructions);
     
 private:
     std::string playerName;
