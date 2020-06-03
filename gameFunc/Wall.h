@@ -6,6 +6,7 @@
 #include "BoxLid.h"
 
 #include <iostream>
+#include <string>
 #include <fstream>
 
 #define NORMAL_WALL_LINES_NUM 5
@@ -24,6 +25,8 @@ public:
 
     // getter for wallLinesNum
     int getWallLinesNum();
+
+    std::string getTilesAsStringFixedWallMode(int lineIndex);
 
     // get line object at given index
     linePtr getLine(int index);

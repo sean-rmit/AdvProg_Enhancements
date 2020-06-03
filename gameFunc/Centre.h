@@ -37,7 +37,6 @@ public:
 private:
 
     std::vector<char> centreTiles;
-    Painter *painter;
 };
 
 typedef Centre* centrePtr;

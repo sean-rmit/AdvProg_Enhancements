@@ -51,7 +51,6 @@ Wall::Wall(Wall &other)
 
 void Wall::initialiseFixedColourPattern()
 {
-    std::cout << "DEBUG: initialiseFixedColourPattern() called" << std::endl;
     // read in from an fixedWallPatternTiles.txt file
     std::string filename = "";
     if (sixTileMode)
@@ -79,6 +78,16 @@ void Wall::initialiseFixedColourPattern()
 int Wall::getWallLinesNum()
 {
     return this->wallLinesNum;
+}
+
+std::string Wall::getTilesAsStringFixedWallMode(int lineIndex) {
+    std::string allTilesAsString;
+    Painter *painter = new Painter();
+    for (int i = 0; i < wallLinesNum; i++)
+    {
+        allTilesAsString += painter->paintWallTile(wallLines[lineIndex]->getTileColour(i), fixedColourPattern[lineIndex]->getTileColour(i));
+    }
+    return allTilesAsString;
 }
 
 linePtr Wall::getLine(int index)

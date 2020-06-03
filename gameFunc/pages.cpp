@@ -5,52 +5,7 @@
 
 void mainMenuPage(int seed)
 {
-    //line 1
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-    
-    //line 2
-    printString(" ", PAGEWIDTH / 2 - 2); //3 = half of letters in AZUL
-    printf(BOLD_TEXT);
-    printf(RED_TEXT);
-    std::cout << "A";
-    printf(YELLOW_TEXT);
-    std::cout << "Z";
-    printf(GREEN_TEXT);
-    std::cout << "U";
-    printf(DARKBLUE_TEXT);
-    std::cout << "L";
-    std::cout << std::endl;
-    printf(RESET);
-
-    //line 3
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-    std::cout << std::endl;
-    
-    //line 4
-    printString(" ", PAGEWIDTH / 2 - 10);
-    std::cout << "New Game < enter 'N'";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    //line 5
-    printString(" ", PAGEWIDTH / 2 - 10);
-    std::cout << "Load Game < enter 'L'";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    //line 5
-    printString(" ", PAGEWIDTH / 2 - 10);
-    std::cout << "Credits < enter 'C'";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    //line 6
-    printString(" ", PAGEWIDTH / 2 - 10);
-    std::cout << "Quit Game < enter 'Q'";
-    std::cout << std::endl;
-    std::cout << std::endl;
+    printMainMenuTemplate();
 
     bool mainMenuRunning = true;
     while (mainMenuRunning)
@@ -68,63 +23,87 @@ void mainMenuPage(int seed)
         }
         else if (input == 'N' || input == 'n')
         {
-            bool sixTileMode = false;
-            bool greyMode = false;
-            printSixTileModePrompt();
-            std::cout << "> ";
-            std::cin >> input;
-            if (input == 'B' || input == 'b') {
-                std::cout << "Six Tile Mode chosen!" << std::endl;
-                sixTileMode = true;
-            }
-            else if (input == 'A' || input == 'a') {
-                std::cout << "Normal Mode chosen!" << std::endl;
-                sixTileMode = false;
-            }
-            else {
-                std::cout << "WARNING: You have entered an invalid value. Normal Mode will be chosen." << std::endl;
-            }
+            bool modsChosen = false;
             
-            printGreyModePrompt();
-            std::cout << "> ";
-            std::cin >> input;
-            if (input == 'B' || input == 'b') {
-                std::cout << "Grey Mode chosen!" << std::endl;
-                greyMode = true;
-            }
-            else if (input == 'A' || input == 'a') {
-                std::cout << "Fixed Wall Mode chosen!" << std::endl;
-                greyMode = false;
-            }
-            else {
-                std::cout << "You have entered an invalid value. Fixed Wall Mode will be chosen." << std::endl;
-            }
+            while (!modsChosen)
+            {
+                bool sixTileMode = false;
+                bool greyMode = false;
+                printSixTileModePrompt();
+                std::cout << "> ";
+                std::cin >> input;
+                if (input == 'B' || input == 'b')
+                {
+                    std::cout << "Six Tile Mode chosen!" << std::endl;
+                    sixTileMode = true;
+                }
+                else if (input == 'A' || input == 'a')
+                {
+                    std::cout << "Normal Mode chosen!" << std::endl;
+                    sixTileMode = false;
+                }
+                else if (std::cin.eof()) {
+                    // if Ctrl+D is entered terminate the while loops
+                    modsChosen = true;
+                }
+                else
+                {
+                    std::cout << "WARNING: You have entered an invalid value. Normal Mode will be chosen." << std::endl;
+                }
 
-            std::cout << "Number of players: " << std::endl;
-            int playersNum = 0;
-            std::string playersNumAsString;
-            std::cin >> playersNumAsString;
-            int centresNum = 0;
-            std::cout << "Number of centres: " << std::endl;
-            std::string centresNumAsString;
-            std::cin >> centresNumAsString;
-            try
-            {
-                playersNum = std::stoi(playersNumAsString);
-                centresNum = std::stoi(centresNumAsString);
-            }
-            catch (std::invalid_argument const &e)
-            {
-                
-            }
-            if (playersNum >= 2 && playersNum <= 4 && centresNum >= 1 && centresNum <= 2)
-            {
-                newGamePage(playersNum, centresNum, sixTileMode, greyMode, seed);
-                mainMenuRunning = false;
-            }
-            else
-            {
-                std::cout << "Invalid number of players or centres!" << std::endl;
+                printGreyModePrompt();
+                std::cout << "> ";
+                std::cin >> input;
+                if (input == 'B' || input == 'b')
+                {
+                    std::cout << "Grey Mode chosen!" << std::endl;
+                    greyMode = true;
+                }
+                else if (input == 'A' || input == 'a')
+                {
+                    std::cout << "Fixed Wall Mode chosen!" << std::endl;
+                    greyMode = false;
+                }
+                else if (std::cin.eof()) {
+                    // if Ctrl+D is entered terminate the while loops
+                    modsChosen = true;
+                }
+                else
+                {
+                    std::cout << "You have entered an invalid value. Fixed Wall Mode will be chosen." << std::endl;
+                }
+
+                std::cout << "Number of players: " << std::endl;
+                int playersNum = 0;
+                std::string playersNumAsString;
+                std::cin >> playersNumAsString;
+                int centresNum = 0;
+                std::cout << "Number of centres: " << std::endl;
+                std::string centresNumAsString;
+                std::cin >> centresNumAsString;
+                if (std::cin.eof()) {
+                    // if Ctrl+D is entered terminate the while loops
+                    modsChosen = true;
+                }
+                try
+                {
+                    playersNum = std::stoi(playersNumAsString);
+                    centresNum = std::stoi(centresNumAsString);
+                }
+                catch (std::invalid_argument const &e)
+                {
+                }
+                if (playersNum >= 2 && playersNum <= 4 && centresNum >= 1 && centresNum <= 2)
+                {
+                    newGamePage(playersNum, centresNum, sixTileMode, greyMode, seed);
+                    modsChosen = true;
+                    mainMenuRunning = false;
+                }
+                else
+                {
+                    std::cout << "Invalid number of players or centres!" << std::endl;
+                    
+                }
             }
         }
         else if (input == 'L' || input == 'l')
@@ -158,7 +137,6 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
     // game initialised
     Game *game = new Game(playersNum, centresNum, sixTileMode, greyMode, seed);
 
-
     // take in player names
     for (int i = 0; i < playersNum; i++)
     {
@@ -170,10 +148,11 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
     }
 
     game->getBag()->fillBagWithTiles(seed, sixTileMode);
-    if (centresNum == 1) {
+    if (centresNum == 1)
+    {
         game->getFactories()->getCentre(0)->addTile(FIRSTPLAYER);
     }
-    
+
     bool gameOngoing = true;
     std::cout << "Let’s Play!\n"
               << std::endl;
@@ -195,7 +174,7 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
 
             printFactories(game->getFactories());
             std::cout << std::endl;
-            printPlayerMosaics(game->getPlayers(), sixTileMode);
+            printPlayerMosaics(game->getPlayers(), sixTileMode, greyMode);
             bool validMove = false;
             // loop until valid move is made
             while (!validMove)
@@ -259,7 +238,7 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
             }
             if (game->hasGameEnded())
             {
-                printEndGameMessage(game->getPlayers(), game->isSixTileMode());
+                printEndGameMessage(game->getPlayers(), game->isSixTileMode(), game->isGreyMode());
                 game->finaliseGame();
                 roundOngoing = false;
                 gameOngoing = false;
@@ -328,7 +307,7 @@ void loadGamePage()
             }
             if (game->hasGameEnded())
             {
-                printEndGameMessage(game->getPlayers(), game->isSixTileMode());
+                printEndGameMessage(game->getPlayers(), game->isSixTileMode(), game->isGreyMode());
                 game->finaliseGame();
                 roundOngoing = false;
                 gameOngoing = false;
@@ -344,7 +323,7 @@ void loadGamePage()
 
             printFactories(game->getFactories());
             std::cout << std::endl;
-            printPlayerMosaics(game->getPlayers(), game->isSixTileMode());
+            printPlayerMosaics(game->getPlayers(), game->isSixTileMode(), game->isGreyMode());
             bool validMove = false;
             // loop until valid move is made
             while (!validMove)
@@ -408,7 +387,7 @@ void loadGamePage()
             }
             if (game->hasGameEnded())
             {
-                printEndGameMessage(game->getPlayers(), game->isSixTileMode());
+                printEndGameMessage(game->getPlayers(), game->isSixTileMode(), game->isGreyMode());
                 game->finaliseGame();
                 roundOngoing = false;
                 gameOngoing = false;

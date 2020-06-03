@@ -78,7 +78,6 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
             std::cout << "File was not found, please enter another file: " << std::endl;
             std::string filename;
             std::cin >> filename;
-
             loadFile = filename;
         }
         else
@@ -295,7 +294,8 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                     {
                         game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->addTileToBack(data[k]);
                     }
-                    if (data[k] == FIRSTPLAYER) {
+                    if (data[k] == FIRSTPLAYER)
+                    {
                         std::cout << "game->setFirstPlayerTokenTaken(true);" << std::endl;
                         game->setFirstPlayerTokenTaken(true);
                     }

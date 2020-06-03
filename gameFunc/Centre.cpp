@@ -4,7 +4,6 @@
 
 Centre::Centre() : centreTiles()
 {
-    painter = new Painter();
 }
 
 Centre::Centre(Centre &other)
@@ -53,10 +52,12 @@ void Centre::clear()
 std::string Centre::getTilesAsString(bool painted)
 {
     std::string allTilesAsString;
+    Painter *painter = new Painter();
     for (unsigned int i = 0; i < centreTiles.size(); i++)
     {
         if (painted) {
-            allTilesAsString += painter->paintTile(centreTiles.at(i));
+            char tile = centreTiles.at(i);
+            allTilesAsString += painter->paintTile(tile);
         }
         else {
             allTilesAsString += centreTiles.at(i);

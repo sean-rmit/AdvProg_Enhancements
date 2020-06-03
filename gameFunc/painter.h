@@ -40,7 +40,8 @@ public:
     Painter();
     ~Painter();
 
-    std::string static paintTile(char tile);
+    std::string paintTile(char tile);
+    std::string paintWallTile(char actualTile, char templateTile);
     std::string paintString(std::string s, std::string colour);
     
 private:

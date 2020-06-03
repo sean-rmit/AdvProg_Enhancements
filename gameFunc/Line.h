@@ -47,7 +47,7 @@ private:
     char* line;
     int array_length; //size of the array of line
     int numTiles; // number of tiles in array of line
-    Painter *painter;
+    
 };
 
 typedef Line* linePtr;
