@@ -1,5 +1,5 @@
 #include <iostream>
-#include <string>
+#include <fstream>
 #include <cstdio>
 #include "pages.h"
 
@@ -23,8 +23,9 @@ void mainMenuPage(int seed)
         }
         else if (input == 'N' || input == 'n')
         {
+            printNewGameTitle();
             bool modsChosen = false;
-            
+
             while (!modsChosen)
             {
                 bool sixTileMode = false;
@@ -42,7 +43,8 @@ void mainMenuPage(int seed)
                     std::cout << "Normal Mode chosen!" << std::endl;
                     sixTileMode = false;
                 }
-                else if (std::cin.eof()) {
+                else if (std::cin.eof())
+                {
                     // if Ctrl+D is entered terminate the while loops
                     modsChosen = true;
                 }
@@ -64,7 +66,8 @@ void mainMenuPage(int seed)
                     std::cout << "Fixed Wall Mode chosen!" << std::endl;
                     greyMode = false;
                 }
-                else if (std::cin.eof()) {
+                else if (std::cin.eof())
+                {
                     // if Ctrl+D is entered terminate the while loops
                     modsChosen = true;
                 }
@@ -81,7 +84,8 @@ void mainMenuPage(int seed)
                 std::cout << "Number of centres: " << std::endl;
                 std::string centresNumAsString;
                 std::cin >> centresNumAsString;
-                if (std::cin.eof()) {
+                if (std::cin.eof())
+                {
                     // if Ctrl+D is entered terminate the while loops
                     modsChosen = true;
                 }
@@ -102,14 +106,53 @@ void mainMenuPage(int seed)
                 else
                 {
                     std::cout << "Invalid number of players or centres!" << std::endl;
-                    
                 }
             }
         }
         else if (input == 'L' || input == 'l')
         {
-            loadGamePage();
-            mainMenuRunning = false;
+            printLoadGameTitle();
+            // User input for filename
+            bool found = false;
+            bool forcequit = false;
+            bool back = false;
+            std::string filename = "";
+            while (!found)
+            {
+                std::cout << "Enter the filename you wish to load the game from, or type 'B' to go back to the main menu" << std::endl;
+                std::cout << "> ";
+                std::cin >> filename;
+                std::ifstream checkFile(filename);
+                // check for Ctrl+D
+                if (std::cin.eof())
+                {
+                    found = true;
+                    forcequit = true;
+                }
+                // check for B
+                if (filename == "B" || filename == "b") {
+                    found = true;
+                    back = true;
+                }
+                // Check if file exists
+                if (!checkFile && !found)
+                {
+                    std::cout << "File was not found. Please try again." << std::endl;
+                }
+                else
+                {
+                    found = true;
+                }
+            }
+            if (!forcequit && !back) {
+                loadGamePage(filename);
+            }
+            if (back) {
+                printMainMenuTemplate();
+            }
+            else {
+                mainMenuRunning = false;
+            }
         }
         else
         {
@@ -120,20 +163,6 @@ void mainMenuPage(int seed)
 
 void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode, int seed)
 {
-    //line 1
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-
-    //line 2
-    printString(" ", PAGEWIDTH / 2 - 4); //4 = half of letters in NEW GAME
-    std::cout << "NEW GAME";
-    std::cout << std::endl;
-
-    //line 3
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-    std::cout << std::endl;
-
     // game initialised
     Game *game = new Game(playersNum, centresNum, sixTileMode, greyMode, seed);
 
@@ -142,8 +171,10 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
     {
         std::cout << "Enter a name for player " << i + 1 << ":" << std::endl;
         std::cout << "> ";
-        std::string playerName;
-        std::cin >> playerName;
+        std::string input;
+        std::cin >> input;
+        // due to console constraint, name will be cut to max 14 letters
+        std::string playerName = input.substr(0, 14);
         game->getPlayers()->getPlayer(i)->setPlayerName(playerName);
     }
 
@@ -249,27 +280,8 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
     delete game;
 }
 
-void loadGamePage()
+void loadGamePage(std::string filename)
 {
-    //line 1
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-
-    //line 2
-    printString(" ", PAGEWIDTH / 2 - 4);
-    std::cout << "LOAD GAME";
-    std::cout << std::endl;
-
-    //line 3
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    // User input for filename
-    std::cout << "Enter the filename you wish to load the game from:" << std::endl;
-    std::cout << "> ";
-    std::string filename;
-    std::cin >> filename;
 
     bool gameOngoing = true;
     int turnCounter = 0;

@@ -339,3 +339,35 @@ void printEndGameMessage(Players *players, bool sixTileMode, bool greyMode)
     std::cout << "A player has completed a horizontal line on their wall, the game ends!" << std::endl;
     printPlayerMosaics(players, sixTileMode, greyMode);
 }
+
+void printLoadGameTitle() {
+    //line 1
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+
+    //line 2
+    printString(" ", PAGEWIDTH / 2 - 4);
+    std::cout << "LOAD GAME";
+    std::cout << std::endl;
+
+    //line 3
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+    std::cout << std::endl;
+}
+
+void printNewGameTitle() {
+    //line 1
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+
+    //line 2
+    printString(" ", PAGEWIDTH / 2 - 4); //4 = half of letters in NEW GAME
+    std::cout << "NEW GAME";
+    std::cout << std::endl;
+
+    //line 3
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+    std::cout << std::endl;
+}

@@ -253,8 +253,6 @@ bool Game::playerMakesMove(int playerNum)
             return validMove;
         }
     }
-
-    std::cout << "DEBUG: end of playerMakesMove() function reached, this shouldn't happen" << std::endl;
     return false;
 }
 

@@ -1,6 +1,8 @@
 #ifndef PAGES_H
 #define PAGES_H
 
+#include <string>
+
 #include "utils.h"
 #include "game.h"
 #include "LoadSaveFile.h"
@@ -18,7 +20,7 @@ void creditsPage();
 void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode, int seed);
 
 // Asks file to be loaded then displays the loaded board
-void loadGamePage();
+void loadGamePage(std::string filename);
 
 
 #endif // PAGES_H

@@ -68,23 +68,6 @@ void LoadSave::saveFile(std::string saveFile, Game *game, int currentPlayer)
 gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
 {
     Game *game = new Game();
-    bool found = false;
-    while (found == false)
-    {
-        std::ifstream checkFile(loadFile);
-        // Check if file exists
-        if (!checkFile && (found == false))
-        {
-            std::cout << "File was not found, please enter another file: " << std::endl;
-            std::string filename;
-            std::cin >> filename;
-            loadFile = filename;
-        }
-        else
-        {
-            found = true;
-        }
-    }
 
     // Reading file in
     std::ifstream savedFile(loadFile);

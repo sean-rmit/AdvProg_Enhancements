@@ -67,7 +67,7 @@ bool Player::takeTilesFromFactory(Factory *factory, char colour, Centre *centre,
     // if patternline chosen has a different colour, invalid move
     else if (playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) != NOTILE && playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) != colour)
     {
-        std::cout << "Pattern line has tiles of colour " << playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) << " but you chose the color " << colour << ". Invalid move!" << std::endl;
+        std::cout << "Pattern line chosen already has the colour " << playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) << ". Invalid move!" << std::endl;
     }
     // check if wall already has that colour
     for (int i = 0; i < playerMosaic->getPlayerWall()->getWallLinesNum(); i++)
@@ -156,7 +156,7 @@ bool Player::takeTilesFromCentre(char colour, Centre *centre, int patternLineInd
     // if patternline chosen has a different colour, invalid move
     else if (playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) != NOTILE && playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) != colour)
     {
-        std::cout << "Pattern line has tiles of colour " << playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) << " but you chose the colour " << colour << ". Invalid move!" << std::endl;
+        std::cout << "Pattern line chosen already has the colour " << playerMosaic->getPlayerPatternLines()->getLine(patternLineIndex)->getTileColour(0) << ". Invalid move!" << std::endl;
         return false;
     }
     // if patternLine at patternLineIndex is already full, invalid move
