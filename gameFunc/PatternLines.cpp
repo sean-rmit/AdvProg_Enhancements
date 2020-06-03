@@ -3,11 +3,11 @@
 #include <string>
 #include <exception>
 
-PatternLines::PatternLines(bool advMode)
+PatternLines::PatternLines(bool sixTileMode)
 {
-    this->advMode = advMode;
-    if (advMode) {
-        patternLinesNum = ADV_PATTERN_LINES_NUM;
+    this->sixTileMode = sixTileMode;
+    if (sixTileMode) {
+        patternLinesNum = SIX_TILE_MODE_PATTERN_LINES_NUM;
     }
     else {
         patternLinesNum = NORMAL_PATTERN_LINES_NUM;

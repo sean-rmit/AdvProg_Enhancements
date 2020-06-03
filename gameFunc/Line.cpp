@@ -7,6 +7,7 @@ Line::Line()
 {
     this->array_length = 0;
     numTiles = 0;
+    painter = new Painter();
 }
 
 Line::Line(int length)
@@ -149,14 +150,19 @@ char Line::removeTile(int index)
     return tile;
 }
 
-std::string Line::getTilesAsString(bool hasNoTile)
+std::string Line::getTilesAsString(bool hasNoTile, bool painted)
 {
     std::string allTilesAsString;
     for (int i = 0; i < array_length; i++)
     {
         if (line[i] != NOTILE)
         {
-            allTilesAsString += line[i];
+            if (painted) {
+                allTilesAsString += painter->paintTile(line[i]);
+            }
+            else {
+                allTilesAsString += line[i];
+            }
         }
         else
         {

@@ -7,13 +7,13 @@
 #include "BoxLid.h"
 
 #define NORMAL_PATTERN_LINES_NUM 5
-#define ADV_PATTERN_LINES_NUM    6
+#define SIX_TILE_MODE_PATTERN_LINES_NUM    6
 
 class PatternLines {
 public:
 
     // Constructor
-    PatternLines(bool advMode);
+    PatternLines(bool sixTileMode);
     // Deconstructor
     ~PatternLines();
 
@@ -26,7 +26,7 @@ public:
 private:
     linePtr *patternLines;
     int patternLinesNum;
-    bool advMode;
+    bool sixTileMode;
 };
 
 typedef PatternLines* patternLinesPtr;

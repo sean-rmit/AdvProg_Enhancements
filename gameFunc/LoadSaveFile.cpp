@@ -19,8 +19,8 @@ void LoadSave::saveFile(std::string saveFile, Game *game, int currentPlayer)
 {
     std::ofstream saveToFile(saveFile);
 
-    // Advanced mode and Grey mode
-    saveToFile << "ADV_MODE=" << game->isAdvMode() << std::endl;
+    // Six tile mode and Grey mode
+    saveToFile << "SIX_TILE_MODE=" << game->isSixTileMode() << std::endl;
     saveToFile << "GREY_MODE=" << game->isGreyMode() << std::endl;
 
     // Number of players
@@ -38,11 +38,11 @@ void LoadSave::saveFile(std::string saveFile, Game *game, int currentPlayer)
     // Factory Details
     for (int i = 0; i < game->getFactories()->getCentresNum(); i++)
     {
-        saveToFile << "FACTORY_CENTRE_" << i << "=" << game->getFactories()->getCentre(i)->getTilesAsString() << std::endl;
+        saveToFile << "FACTORY_CENTRE_" << i << "=" << game->getFactories()->getCentre(i)->getTilesAsString(false) << std::endl;
     }
     for (int i = 0; i < game->getFactories()->getFactoriesNum(); i++)
     {
-        saveToFile << "FACTORY_" << i << "=" << game->getFactories()->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
+        saveToFile << "FACTORY_" << i << "=" << game->getFactories()->getFactory(i)->getLine()->getTilesAsString(false, false) << std::endl;
     }
 
     // Players Details
@@ -50,14 +50,14 @@ void LoadSave::saveFile(std::string saveFile, Game *game, int currentPlayer)
     {
         saveToFile << "PLAYER_" << playerNum << "_NAME=" << game->getPlayers()->getPlayer(playerNum)->getPlayerName() << std::endl;
         saveToFile << "PLAYER_" << playerNum << "_SCORE=" << game->getPlayers()->getPlayer(playerNum)->getPlayerScore() << std::endl;
-        for (int i = 0; i < 5; i++)
+        for (int i = 0; i < game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum(); i++)
         {
-            saveToFile << "PLAYER_" << playerNum << "_PATTERN_LINE" << i << "=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true) << std::endl;
+            saveToFile << "PLAYER_" << playerNum << "_PATTERN_LINE" << i << "=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true, false) << std::endl;
         }
-        saveToFile << "PLAYER_" << playerNum << "_FLOOR_LINE=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
-        for (int i = 0; i < 5; i++)
+        saveToFile << "PLAYER_" << playerNum << "_FLOOR_LINE=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true, false) << std::endl;
+        for (int i = 0; i < game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getWallLinesNum(); i++)
         {
-            saveToFile << "PLAYER_" << playerNum << "_MOSAIC_" << i << "=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+            saveToFile << "PLAYER_" << playerNum << "_MOSAIC_" << i << "=" << game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true, false) << std::endl;
         }
     }
 
@@ -95,14 +95,14 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
     std::string line;
     int playersNum = 0;
     int centresNum = 0;
-    bool advMode = false;
+    bool sixTileMode = false;
     bool greyMode = false;
     while (getline(savedFile, line))
     {
         std::string data;
 
-        // Advanced Mode boolean
-        if (line.find("ADV_MODE") != std::string::npos)
+        // Six Tile Mode boolean
+        if (line.find("SIX_TILE_MODE") != std::string::npos)
         {
             getData(line, data);
 
@@ -110,11 +110,11 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
             // dl = data.length();
             try
             {
-                advMode = std::stoi(data);
+                sixTileMode = std::stoi(data);
             }
             catch (std::invalid_argument const &e)
             {
-                std::cout << "Invalid adv mode boolean from save file." << std::endl;
+                std::cout << "Invalid six tile mode boolean from save file." << std::endl;
             }
         }
 
@@ -171,7 +171,7 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
         }
     }
     std::cout << "DEBUG: createFactoriesAndPlayers(): " << playersNum << "," << centresNum << std::endl;
-    game->createFactoriesAndPlayers(playersNum, centresNum, advMode, greyMode);
+    game->createFactoriesAndPlayers(playersNum, centresNum, sixTileMode, greyMode);
 
     // Reading file in
     std::ifstream savedFile2(loadFile);
@@ -261,7 +261,7 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                 game->getPlayers()->getPlayer(playerNum)->setPlayerScore(stoi(data));
             }
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum(); i++)
             {
                 std::string playerPattern = "PLAYER_" + playerNumAsString + "_PATTERN_LINE";
                 playerPattern += std::to_string(i);
@@ -302,7 +302,7 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                 }
             }
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < game->getPlayers()->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getWallLinesNum(); i++)
             {
                 std::string playerMosaic = "PLAYER_" + playerNumAsString + "_MOSAIC_";
                 playerMosaic += std::to_string(i);

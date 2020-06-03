@@ -10,7 +10,7 @@ class Mosaic {
     public:
 
     // Constructor
-    Mosaic(bool advMode, bool greyMode);
+    Mosaic(bool sixTileMode, bool greyMode);
     // Deconstructor
     ~Mosaic();
 

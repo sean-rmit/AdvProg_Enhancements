@@ -87,7 +87,7 @@ std::string Bag::getTilesAsString()
     return allTilesAsString;
 }
 
-void Bag::fillBagWithTiles(int seed, bool advMode)
+void Bag::fillBagWithTiles(int seed, bool sixTileMode)
 {
     // temporary vector to fill up the TileBag
     std::vector<char> tempVector;
@@ -117,8 +117,8 @@ void Bag::fillBagWithTiles(int seed, bool advMode)
     {
         tempVector.push_back(BLACK);
     }
-    // fill tempVector with orange tiles if it is advanced mode
-    if (advMode)
+    // fill tempVector with orange tiles if it is six tle mode
+    if (sixTileMode)
     {
         for (int i = 0; i < ORANGE_TILES_NUM; i++)
         {
@@ -131,8 +131,8 @@ void Bag::fillBagWithTiles(int seed, bool advMode)
      *Reduce max index of tempVector by 1 every loop to adjust according to tempVector's size
      */
     int tileBagSize = 0;
-    if (advMode) {
-        tileBagSize = ADV_TILEBAG_SIZE;
+    if (sixTileMode) {
+        tileBagSize = SIX_TILE_MODE_TILEBAG_SIZE;
     }
     else {
         tileBagSize = NORMAL_TILEBAG_SIZE;

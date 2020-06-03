@@ -9,12 +9,12 @@
 #include <fstream>
 
 #define NORMAL_WALL_LINES_NUM 5
-#define ADV_WALL_LINES_NUM    6
+#define SIX_TILE_MODE_WALL_LINES_NUM    6
 
 class Wall {
 public:
 
-    Wall(bool advMode, bool greyMode);
+    Wall(bool sixTileMode, bool greyMode);
     ~Wall();
 
     // copy constructor
@@ -37,9 +37,10 @@ public:
 
 private:
     linePtr *wallLines;
-    char fixedColourPattern[NORMAL_WALL_LINES_NUM][NORMAL_WALL_LINES_NUM];
+    // char fixedColourPattern[NORMAL_WALL_LINES_NUM][NORMAL_WALL_LINES_NUM];
+    linePtr *fixedColourPattern; // the wall template on a fixed wall colour game
     int wallLinesNum;
-    bool advMode;
+    bool sixTileMode;
     bool greyMode;
 };
 

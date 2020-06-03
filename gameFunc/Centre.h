@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Tiles.h"
+#include "painter.h"
 
 class Centre {
 public:
@@ -31,12 +32,12 @@ public:
     // Removes all tiles from factories
     void clear();
 
-    std::string getTilesAsString();
+    std::string getTilesAsString(bool painted);
 
 private:
 
     std::vector<char> centreTiles;
-
+    Painter *painter;
 };
 
 typedef Centre* centrePtr;

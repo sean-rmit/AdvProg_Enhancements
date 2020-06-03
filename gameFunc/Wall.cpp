@@ -1,22 +1,30 @@
 #include "Wall.h"
 
-Wall::Wall(bool advMode, bool greyMode)
+#include <iostream>
+
+Wall::Wall(bool sixTileMode, bool greyMode)
 {
-    this->advMode = advMode;
+    this->sixTileMode = sixTileMode;
     this->greyMode = greyMode;
-    if (!advMode)
+    if (!sixTileMode)
     {
         wallLinesNum = NORMAL_WALL_LINES_NUM;
     }
     else
     {
-        wallLinesNum = ADV_WALL_LINES_NUM;
+        wallLinesNum = SIX_TILE_MODE_WALL_LINES_NUM;
     }
     wallLines = new linePtr[wallLinesNum];
+    fixedColourPattern = new linePtr[wallLinesNum];
     for (int i = 0; i < wallLinesNum; i++)
     {
         Line *line = new Line(wallLinesNum);
         wallLines[i] = line;
+    }
+    for (int i = 0; i < wallLinesNum; i++)
+    {
+        Line *line = new Line(wallLinesNum);
+        fixedColourPattern[i] = line;
     }
     if (!greyMode)
     {
@@ -30,7 +38,11 @@ Wall::~Wall()
     {
         delete wallLines[i];
     }
+    for (int i = 0; i < wallLinesNum; i++) {
+        delete fixedColourPattern[i];
+    }
     delete wallLines;
+    delete fixedColourPattern;
 }
 
 Wall::Wall(Wall &other)
@@ -39,11 +51,12 @@ Wall::Wall(Wall &other)
 
 void Wall::initialiseFixedColourPattern()
 {
+    std::cout << "DEBUG: initialiseFixedColourPattern() called" << std::endl;
     // read in from an fixedWallPatternTiles.txt file
-    std::string filename;
-    if (advMode)
+    std::string filename = "";
+    if (sixTileMode)
     {
-        filename = "fixedWallPatternTilesAdv.txt";
+        filename = "fixedWallPatternTilesSixTileMode.txt";
     }
     else
     {
@@ -55,7 +68,10 @@ void Wall::initialiseFixedColourPattern()
     {
         for (int j = 0; j < wallLinesNum; j++)
         {
-            inputFile >> fixedColourPattern[i][j];
+            char tile;
+            inputFile >> tile;
+            fixedColourPattern[i]->addTileToBack(tile);
+            // inputFile >> fixedColourPattern[i][j];
         }
     }
 }
@@ -75,7 +91,8 @@ int Wall::addTile(char tile, int lineIndex, Lid *lid)
     int points = 0;
     for (int i = 0; i < wallLinesNum; i++)
     {
-        if (fixedColourPattern[lineIndex][i] == tile)
+        if (fixedColourPattern[lineIndex]->getTileColour(i) == tile)
+        // if (fixedColourPattern[lineIndex][i] == tile)
         {
             if (!wallLines[lineIndex]->hasTile(i))
             {

@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "game.h"
 #include "LoadSaveFile.h"
+#include "painter.h"
 
 #define PAGEWIDTH       80
 
@@ -14,7 +15,7 @@ void mainMenuPage(int seed);
 void creditsPage();
 
 // Displays empty board for a new name
-void newGamePage(int playersNum, int centresNum, bool advMode, bool greyMode, int seed);
+void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode, int seed);
 
 // Asks file to be loaded then displays the loaded board
 void loadGamePage();

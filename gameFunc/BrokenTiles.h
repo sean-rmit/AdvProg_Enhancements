@@ -20,7 +20,7 @@
 class BrokenTiles {
 public:
     // Constructor
-    BrokenTiles(bool advMode);
+    BrokenTiles(bool sixTileMode);
     // Deconstructor
     ~BrokenTiles();
 

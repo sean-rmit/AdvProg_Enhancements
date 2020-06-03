@@ -1,9 +1,9 @@
 #include "Mosaic.h"
 
-Mosaic::Mosaic(bool advMode, bool greyMode) {
-    playerWall = new Wall(advMode, greyMode);
-    playerPatternLines = new PatternLines(advMode);
-    playerBrokenTiles = new BrokenTiles(advMode);
+Mosaic::Mosaic(bool sixTileMode, bool greyMode) {
+    playerWall = new Wall(sixTileMode, greyMode);
+    playerPatternLines = new PatternLines(sixTileMode);
+    playerBrokenTiles = new BrokenTiles(sixTileMode);
 }
 
 Mosaic::~Mosaic() {

@@ -1,67 +1,33 @@
 #include <iostream>
 #include <string>
-
+#include <cstdio>
 #include "pages.h"
-
-void creditsPage()
-{
-    //line 1
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-
-    //line 2
-    printString(" ", PAGEWIDTH / 2 - 3); //3 = half of letters in CREDITS
-    std::cout << "CREDITS";
-    std::cout << std::endl;
-
-    //line 3
-    printString("=", PAGEWIDTH);
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    //line 4
-    printString(" ", PAGEWIDTH / 2 - 4);
-    std::cout << "Design by";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    //line 5
-    printString(" ", PAGEWIDTH / 2 - 8);
-    std::cout << "Sean Tan < s3806690 >";
-    std::cout << std::endl;
-
-    //line 6
-    printString(" ", PAGEWIDTH / 2 - 9);
-    std::cout << "Aaron Soa < s3786067 >";
-    std::cout << std::endl;
-
-    //line 7
-    printString(" ", PAGEWIDTH / 2 - 10);
-    std::cout << "Amy Nguyen < s3783694 >";
-    std::cout << std::endl;
-    std::cout << std::endl;
-
-    std::cout << "New Game < enter 'N'" << std::endl;
-    std::cout << "Load Game < enter 'L'" << std::endl;
-    std::cout << "Quit Game < enter 'Q'" << std::endl;
-}
 
 void mainMenuPage(int seed)
 {
     //line 1
     printString("=", PAGEWIDTH);
     std::cout << std::endl;
-
+    
     //line 2
     printString(" ", PAGEWIDTH / 2 - 2); //3 = half of letters in AZUL
-    std::cout << "AZUL";
+    printf(BOLD_TEXT);
+    printf(RED_TEXT);
+    std::cout << "A";
+    printf(YELLOW_TEXT);
+    std::cout << "Z";
+    printf(GREEN_TEXT);
+    std::cout << "U";
+    printf(DARKBLUE_TEXT);
+    std::cout << "L";
     std::cout << std::endl;
+    printf(RESET);
 
     //line 3
     printString("=", PAGEWIDTH);
     std::cout << std::endl;
     std::cout << std::endl;
-
+    
     //line 4
     printString(" ", PAGEWIDTH / 2 - 10);
     std::cout << "New Game < enter 'N'";
@@ -102,18 +68,18 @@ void mainMenuPage(int seed)
         }
         else if (input == 'N' || input == 'n')
         {
-            bool advMode = false;
+            bool sixTileMode = false;
             bool greyMode = false;
-            printAdvModePrompt();
+            printSixTileModePrompt();
             std::cout << "> ";
             std::cin >> input;
             if (input == 'B' || input == 'b') {
-                std::cout << "Advance Mode chosen!" << std::endl;
-                advMode = true;
+                std::cout << "Six Tile Mode chosen!" << std::endl;
+                sixTileMode = true;
             }
             else if (input == 'A' || input == 'a') {
                 std::cout << "Normal Mode chosen!" << std::endl;
-                advMode = false;
+                sixTileMode = false;
             }
             else {
                 std::cout << "WARNING: You have entered an invalid value. Normal Mode will be chosen." << std::endl;
@@ -153,7 +119,7 @@ void mainMenuPage(int seed)
             }
             if (playersNum >= 2 && playersNum <= 4 && centresNum >= 1 && centresNum <= 2)
             {
-                newGamePage(playersNum, centresNum, advMode, greyMode, seed);
+                newGamePage(playersNum, centresNum, sixTileMode, greyMode, seed);
                 mainMenuRunning = false;
             }
             else
@@ -173,7 +139,7 @@ void mainMenuPage(int seed)
     }
 }
 
-void newGamePage(int playersNum, int centresNum, bool advMode, bool greyMode, int seed)
+void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode, int seed)
 {
     //line 1
     printString("=", PAGEWIDTH);
@@ -190,7 +156,7 @@ void newGamePage(int playersNum, int centresNum, bool advMode, bool greyMode, in
     std::cout << std::endl;
 
     // game initialised
-    Game *game = new Game(playersNum, centresNum, advMode, greyMode, seed);
+    Game *game = new Game(playersNum, centresNum, sixTileMode, greyMode, seed);
 
 
     // take in player names
@@ -203,7 +169,7 @@ void newGamePage(int playersNum, int centresNum, bool advMode, bool greyMode, in
         game->getPlayers()->getPlayer(i)->setPlayerName(playerName);
     }
 
-    game->getBag()->fillBagWithTiles(seed, advMode);
+    game->getBag()->fillBagWithTiles(seed, sixTileMode);
     if (centresNum == 1) {
         game->getFactories()->getCentre(0)->addTile(FIRSTPLAYER);
     }
@@ -229,8 +195,7 @@ void newGamePage(int playersNum, int centresNum, bool advMode, bool greyMode, in
 
             printFactories(game->getFactories());
             std::cout << std::endl;
-            // printPlayerMosaic(game->getPlayer(playerNum));
-            printPlayerMosaics(game->getPlayers());
+            printPlayerMosaics(game->getPlayers(), sixTileMode);
             bool validMove = false;
             // loop until valid move is made
             while (!validMove)
@@ -294,6 +259,7 @@ void newGamePage(int playersNum, int centresNum, bool advMode, bool greyMode, in
             }
             if (game->hasGameEnded())
             {
+                printEndGameMessage(game->getPlayers(), game->isSixTileMode());
                 game->finaliseGame();
                 roundOngoing = false;
                 gameOngoing = false;
@@ -335,7 +301,6 @@ void loadGamePage()
     std::cout << "DEBUG: firstplayertokentaken=" << game->isFirstPlayerTokenTaken() << std::endl;
     playersNum = game->getPlayers()->getPlayersNum();
     centresNum = game->getFactories()->getCentresNum();
-    delete load;
     std::cout << "=== Azul Game Successfully Loaded ===" << std::endl;
     std::cout << "Let’s Play!" << std::endl;
     printInstructions(centresNum);
@@ -363,6 +328,7 @@ void loadGamePage()
             }
             if (game->hasGameEnded())
             {
+                printEndGameMessage(game->getPlayers(), game->isSixTileMode());
                 game->finaliseGame();
                 roundOngoing = false;
                 gameOngoing = false;
@@ -378,7 +344,7 @@ void loadGamePage()
 
             printFactories(game->getFactories());
             std::cout << std::endl;
-            printPlayerMosaics(game->getPlayers());
+            printPlayerMosaics(game->getPlayers(), game->isSixTileMode());
             bool validMove = false;
             // loop until valid move is made
             while (!validMove)
@@ -442,6 +408,7 @@ void loadGamePage()
             }
             if (game->hasGameEnded())
             {
+                printEndGameMessage(game->getPlayers(), game->isSixTileMode());
                 game->finaliseGame();
                 roundOngoing = false;
                 gameOngoing = false;
@@ -450,5 +417,49 @@ void loadGamePage()
     }
 
     std::cout << "=== GAME OVER ===" << std::endl;
+    delete load;
     delete game;
+}
+
+void creditsPage()
+{
+    //line 1
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+
+    //line 2
+    printString(" ", PAGEWIDTH / 2 - 3); //3 = half of letters in CREDITS
+    std::cout << "CREDITS";
+    std::cout << std::endl;
+
+    //line 3
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    //line 4
+    printString(" ", PAGEWIDTH / 2 - 4);
+    std::cout << "Design by";
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    //line 5
+    printString(" ", PAGEWIDTH / 2 - 8);
+    std::cout << "Sean Tan < s3806690 >";
+    std::cout << std::endl;
+
+    //line 6
+    printString(" ", PAGEWIDTH / 2 - 9);
+    std::cout << "Aaron Soa < s3786067 >";
+    std::cout << std::endl;
+
+    //line 7
+    printString(" ", PAGEWIDTH / 2 - 10);
+    std::cout << "Amy Nguyen < s3783694 >";
+    std::cout << std::endl;
+    std::cout << std::endl;
+
+    std::cout << "New Game < enter 'N'" << std::endl;
+    std::cout << "Load Game < enter 'L'" << std::endl;
+    std::cout << "Quit Game < enter 'Q'" << std::endl;
 }

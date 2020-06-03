@@ -33,7 +33,7 @@ void printFactories(Factories *factories)
     std::cout << std::endl;
     for (int i = 0; i < factories->getCentresNum(); i++)
     {
-        std::cout << i << " - Centre: " << factories->getCentre(i)->getTilesAsString() << std::endl;
+        std::cout << i << " - Centre: " << factories->getCentre(i)->getTilesAsString(true) << std::endl;
     }
     for (int i = 0; i < factories->getFactoriesNum(); i++)
     {
@@ -42,7 +42,7 @@ void printFactories(Factories *factories)
             std::cout << " ";
         }
         std::cout << "- Factory: ";
-        std::cout << factories->getFactory(i)->getLine()->getTilesAsString(false) << std::endl;
+        std::cout << factories->getFactory(i)->getLine()->getTilesAsString(false, true) << std::endl;
     }
     printString("=", 20);
 }
@@ -64,21 +64,24 @@ void printFactories(Factories *factories)
 //     std::cout << "6: broken: " << player->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true) << std::endl;
 // }
 
-void printPlayerMosaics(Players *players)
+void printPlayerMosaics(Players *players, bool sixTileMode)
 {
     std::cout << "Mosaics of Players:" << std::endl;
     // print player names
+    int spacesNeeded = PLAYER_MOSAIC_CONSTRAINT_ON_CONSOLE;
+    if (sixTileMode) {
+        // one extra slot of tile in pattern line and one in wall mosaic during 6-tile mode
+        spacesNeeded += 2;
+    }
     for (int playerNum = 0; playerNum < players->getPlayersNum(); playerNum++)
     {
         std::string playerName = players->getPlayer(playerNum)->getPlayerName();
         std::cout << playerName << ":";
-        int spacesNeeded = PLAYER_MOSAIC_CONSTRAINT_ON_CONSOLE - playerName.size();
-        printString(" ", spacesNeeded);
+        printString(" ", spacesNeeded - playerName.size());
     }
     std::cout << std::endl;
 
     // print players mosaic lines
-    int spacesNeeded = GAP_SIZE;
     int patternLinesNum = players->getPlayer(0)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum();
     for (int i = 0; i < patternLinesNum; i++)
     {
@@ -89,16 +92,21 @@ void printPlayerMosaics(Players *players)
             {
                 std::cout << " ";
             }
-            std::cout << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true);
+            std::cout << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true, true);
             std::cout << " || ";
-            std::cout << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true);
-            printString(" ", spacesNeeded);
+            std::cout << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true, true);
+            printString(" ", GAP_SIZE);
         }
         std::cout << std::endl;
     }
+    spacesNeeded = BROKENLINE_GAP_SIZE;
+    if (sixTileMode) {
+        // one extra slot of tile in broken line during 6-tile mode
+        spacesNeeded += 1;
+    }
     for (int playerNum = 0; playerNum < players->getPlayersNum(); playerNum++)
     {
-        std::cout << "6: broken: " << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true);
+        std::cout << "broken: " << players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerBrokenTiles()->getLine()->getTilesAsString(true, true);
         printString(" ", spacesNeeded);
     }
     std::cout << std::endl;
@@ -142,23 +150,23 @@ void printGreyModeTiltingUI(Player *player, int patternLineIndex, bool instructi
         {
             std::cout << " ";
         }
-        std::cout << player->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true);
+        std::cout << player->getPlayerMosaic()->getPlayerPatternLines()->getLine(i)->getTilesAsString(true, true);
         std::cout << " || ";
-        std::cout << player->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+        std::cout << player->getPlayerMosaic()->getPlayerWall()->getLine(i)->getTilesAsString(true, true) << std::endl;
     }
 }
 
-void printAdvModePrompt() {
+void printSixTileModePrompt() {
     std::cout << "Option A: Normal Mode" << std::endl;
     printString("=", 20);
     std::cout << std::endl;
     std::cout << "Play azul with a 5x5 mosaic wall" << std::endl;
     std::cout << std::endl;
-    std::cout << "Option B: Advanced Mode" << std::endl;
+    std::cout << "Option B: Six Tile Mode" << std::endl;
     printString("=", 20);
     std::cout << std::endl;
     std::cout << "Play azul with a 6x6 mosaic wall, which includes the additional tile colour Orange" << std::endl;
-    std::cout << "Enter A(Normal) or B(Advaned):" << std::endl;
+    std::cout << "Enter A(Normal) or B(Six Tile):" << std::endl;
 }
 
 void printGreyModePrompt() {
@@ -172,4 +180,9 @@ void printGreyModePrompt() {
     std::cout << std::endl;
     std::cout << "Play azul with an unfixed mosaic wall. Design your own mosaic wall!" << std::endl;
     std::cout << "Enter A(Fixed) or B(Grey):" << std::endl;
+}
+
+void printEndGameMessage(Players *players, bool sixTileMode) {
+    std::cout << "A player has completed a horizontal line on their wall, the game ends!" << std::endl;
+    printPlayerMosaics(players, sixTileMode);
 }

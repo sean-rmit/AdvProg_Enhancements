@@ -11,7 +11,7 @@ class Player {
 public:
 
     // Constructor
-    Player(bool advMode, bool greyMode);
+    Player(bool sixTileMode, bool greyMode);
     // Deconstructor
     ~Player();
 

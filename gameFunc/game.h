@@ -13,14 +13,14 @@ class Game {
 public:
 
     Game();
-    Game(int playersNum, int centresNum, bool advMode, bool greyMode, int seed);
+    Game(int playersNum, int centresNum, bool sixTileMode, bool greyMode, int seed);
     ~Game();
 
     // copy constructor
     Game(Game& other);
 
     // To instantiate the needed number of players, factories and centres
-    void createFactoriesAndPlayers(int playersNum, int centresNum, bool advMode, bool greyMode);
+    void createFactoriesAndPlayers(int playersNum, int centresNum, bool sixTileMode, bool greyMode);
 
     // Called after round ends, moves tiles and calculates points
     void finaliseRound();
@@ -51,7 +51,7 @@ public:
     playersPtr getPlayers();
     lidPtr getLid();
     bagPtr getBag();
-    bool isAdvMode();
+    bool isSixTileMode();
     bool isGreyMode();
     bool isFirstPlayerTokenTaken();
 
@@ -65,7 +65,7 @@ private:
     bool firstplayerTokenTaken;
     
     // boolean for advanced mode (6th column & orange tile) and grey mode (blank wall)
-    bool advMode;
+    bool sixTileMode;
     bool greyMode;
 };
 

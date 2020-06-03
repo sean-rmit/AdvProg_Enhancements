@@ -1,8 +1,8 @@
 #include "BrokenTiles.h"
 
 
-BrokenTiles::BrokenTiles(bool advMode) {
-    if (advMode) {
+BrokenTiles::BrokenTiles(bool sixTileMode) {
+    if (sixTileMode) {
         brokenTilesNum = ADV_MAX_BROKEN_TILES;
     }
     else {

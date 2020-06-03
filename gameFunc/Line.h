@@ -2,6 +2,7 @@
 #define MosaicLine
 
 #include "Tiles.h"
+#include "painter.h"
 #include <string>
 
 class Line {
@@ -40,13 +41,13 @@ public:
 
     // Removed a tile at the index
     char removeTile(int index);
-    std::string getTilesAsString(bool hasNoTile);
+    std::string getTilesAsString(bool hasNoTile, bool painted);
     
 private:
     char* line;
     int array_length; //size of the array of line
     int numTiles; // number of tiles in array of line
-    
+    Painter *painter;
 };
 
 typedef Line* linePtr;

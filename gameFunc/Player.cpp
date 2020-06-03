@@ -3,10 +3,10 @@
 
 #include "Player.h"
 
-Player::Player(bool advMode, bool greyMode)
+Player::Player(bool sixTileMode, bool greyMode)
 {
     this->playerScore = 0;
-    playerMosaic = new Mosaic(advMode, greyMode);
+    playerMosaic = new Mosaic(sixTileMode, greyMode);
 }
 
 Player::~Player()
@@ -379,7 +379,7 @@ bool Player::takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *l
 
 void Player::moveTilesFromPatternLineToWall(Lid *lid, bool greyMode)
 {
-    std::cout << "DEBUG: greyMode=" << greyMode<< std::endl;
+    std::cout << "DEBUG: greyMode=" << greyMode << std::endl;
     if (!greyMode)
     {
         for (int lineIndex = 0; lineIndex < playerMosaic->getPlayerPatternLines()->getPatternLinesNum(); lineIndex++)
@@ -397,14 +397,11 @@ void Player::moveTilesFromPatternLineToWall(Lid *lid, bool greyMode)
     // Wall tilting phase for grey mode
     else
     {
-        std::cout << "DEBUG: else called" << std::endl;
         bool tiltingInstructions = true;
         for (int lineIndex = 0; lineIndex < playerMosaic->getPlayerPatternLines()->getPatternLinesNum(); lineIndex++)
         {
-            std::cout << "DEBUG: for loop" << std::endl;
             if (playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->isFull())
             {
-                std::cout << "DEBUG: if statement" << std::endl;
                 printGreyModeTiltingUI(lineIndex, tiltingInstructions);
                 tiltingInstructions = false;
                 bool columnChosen = false;
@@ -425,48 +422,61 @@ void Player::moveTilesFromPatternLineToWall(Lid *lid, bool greyMode)
                         try
                         {
                             wallColumn = std::stoi(wallColumnAsString);
+                            columnChosen = true;
                         }
                         catch (std::invalid_argument const &e)
                         {
-                            std::cout << "Invalid input" << std::endl;
+                            std::cout << "Invalid input. Please try again." << std::endl;
                         }
                         catch (std::out_of_range const &e)
                         {
                             std::cout << "Integer overflow: std::out_of_range thrown" << std::endl;
                         }
-                        // check if the wall column index chosen is valid
-                        if (wallColumn >= 0 && wallColumn < playerMosaic->getPlayerWall()->getWallLinesNum())
+                        if (columnChosen)
                         {
-                            // next check if the wall column index does not already has a value
-                            if (!playerMosaic->getPlayerWall()->getLine(lineIndex)->hasTile(wallColumn)) {
-                                // next check if the vertical column has a duplicate color
-                                bool duplicate = false;
-                                for (int i = 0; i < playerMosaic->getPlayerWall()->getWallLinesNum(); i++) {
-                                    if (playerMosaic->getPlayerWall()->getLine(i)->getTileColour(wallColumn) == playerMosaic->getPlayerPatternLines()->getLine(i)->getTileColour(0)) {
-                                        duplicate = true;
+                            // check if the wall column index chosen is valid
+                            if (wallColumn >= 0 && wallColumn < playerMosaic->getPlayerWall()->getWallLinesNum())
+                            {
+                                // next check if the wall column index does not already has a value
+                                if (!playerMosaic->getPlayerWall()->getLine(lineIndex)->hasTile(wallColumn))
+                                {
+                                    // next check if the vertical column has a duplicate color
+                                    bool duplicate = false;
+                                    for (int i = 0; i < playerMosaic->getPlayerWall()->getWallLinesNum(); i++)
+                                    {
+                                        if (playerMosaic->getPlayerWall()->getLine(i)->getTileColour(wallColumn) == playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->getTileColour(0))
+                                        {
+                                            duplicate = true;
+                                        }
+                                    }
+                                    if (!duplicate)
+                                    {
+                                        columnChosen = true;
+                                    }
+                                    else
+                                    {
+                                        std::cout << "Wall column index chosen already has a tile of the same color on the vertical axis. Please try again." << std::endl;
+                                        columnChosen = false;
                                     }
                                 }
-                                if (!duplicate) {
-                                    columnChosen = true;
-                                }
-                                else {
-                                    std::cout << "Wall column index chosen already has a tile of the same color on the vertical axis. Please try again." << std::endl;
+                                else
+                                {
+                                    std::cout << "Wall column index chosen already has a tile. Please try again." << std::endl;
+                                    columnChosen = false;
                                 }
                             }
-                            else {
-                                std::cout << "Wall column index chosen already has a tile. Please try again." << std::endl;
+                            else
+                            {
+                                std::cout << "Invalid Wall column chosen. Please try again." << std::endl;
+                                columnChosen = false;
                             }
-                        }
-                        else
-                        {
-                            std::cout << "Invalid Wall column chosen. Please try again." << std::endl;
                         }
                     }
                 }
 
                 for (int i = 0; i < playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->size(); i++)
                 {
-                    int points = playerMosaic->getPlayerWall()->addTileGreyMode(playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->removeTile(i), lineIndex, columnChosen, lid);
+                    int points = playerMosaic->getPlayerWall()->addTileGreyMode(playerMosaic->getPlayerPatternLines()->getLine(lineIndex)->removeTile(i), lineIndex, wallColumn, lid);
                     addToPlayerScore(points);
                 }
             }
@@ -500,7 +510,8 @@ void Player::printGreyModeTiltingUI(int patternLineIndex, bool instructions)
         std::cout << "=======================================" << std::endl;
     }
     std::cout << "Column Index:";
-    for (int i = 0; i < playerMosaic->getPlayerPatternLines()->getPatternLinesNum() - 3; i++) {
+    for (int i = 0; i < playerMosaic->getPlayerPatternLines()->getPatternLinesNum() - 3; i++)
+    {
         std::cout << " ";
     }
 
@@ -524,8 +535,8 @@ void Player::printGreyModeTiltingUI(int patternLineIndex, bool instructions)
         {
             std::cout << " ";
         }
-        std::cout << playerMosaic->getPlayerPatternLines()->getLine(i)->getTilesAsString(true);
+        std::cout << playerMosaic->getPlayerPatternLines()->getLine(i)->getTilesAsString(true, true);
         std::cout << " || ";
-        std::cout << playerMosaic->getPlayerWall()->getLine(i)->getTilesAsString(true) << std::endl;
+        std::cout << playerMosaic->getPlayerWall()->getLine(i)->getTilesAsString(true, true) << std::endl;
     }
 }

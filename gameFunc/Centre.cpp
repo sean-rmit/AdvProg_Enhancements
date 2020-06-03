@@ -4,7 +4,7 @@
 
 Centre::Centre() : centreTiles()
 {
-    
+    painter = new Painter();
 }
 
 Centre::Centre(Centre &other)
@@ -50,12 +50,17 @@ void Centre::clear()
     centreTiles.clear();
 }
 
-std::string Centre::getTilesAsString()
+std::string Centre::getTilesAsString(bool painted)
 {
     std::string allTilesAsString;
     for (unsigned int i = 0; i < centreTiles.size(); i++)
     {
-        allTilesAsString += centreTiles.at(i);
+        if (painted) {
+            allTilesAsString += painter->paintTile(centreTiles.at(i));
+        }
+        else {
+            allTilesAsString += centreTiles.at(i);
+        }
     }
     return allTilesAsString;
 }

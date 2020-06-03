@@ -13,15 +13,15 @@ Game::Game()
     twoCentres = false;
     firstplayerTokenTaken = false;
     greyMode = false;
-    advMode = false;
+    sixTileMode = false;
 }
 
-Game::Game(int playersNum, int centresNum, bool advMode, bool greyMode, int seed)
+Game::Game(int playersNum, int centresNum, bool sixTileMode, bool greyMode, int seed)
 {
-    this->advMode = advMode;
+    this->sixTileMode = sixTileMode;
     this->greyMode = greyMode;
     factories = new Factories(playersNum, centresNum);
-    players = new Players(playersNum, advMode, greyMode);
+    players = new Players(playersNum, sixTileMode, greyMode);
     lid = new Lid();
     bag = new Bag();
     twoCentres = false;
@@ -43,15 +43,15 @@ Game::Game(Game &other)
 {
 }
 
-void Game::createFactoriesAndPlayers(int playersNum, int centresNum, bool advMode, bool greyMode)
+void Game::createFactoriesAndPlayers(int playersNum, int centresNum, bool sixTileMode, bool greyMode)
 {
     factories = new Factories(playersNum, centresNum);
-    players = new Players(playersNum, advMode, greyMode);
+    players = new Players(playersNum, sixTileMode, greyMode);
     if (centresNum == 2)
     {
         twoCentres = true;
     }
-    this->advMode = advMode;
+    this->sixTileMode = sixTileMode;
     this->greyMode = greyMode;
 }
 
@@ -165,7 +165,7 @@ bool Game::playerMakesMove(int playerNum)
     //validate tileColour
     if (tileColour != RED && tileColour != YELLOW && tileColour != DARKBLUE && tileColour != LIGHTBLUE && tileColour != BLACK)
     {
-        if (advMode && tileColour == ORANGE) {
+        if (sixTileMode && tileColour == ORANGE) {
             
         }
         else {
@@ -302,7 +302,6 @@ void Game::finaliseGame()
     {
         players->getPlayer(i)->addEndGameBonusPoints();
     }
-    std::cout << "Game has ended: " << std::endl;
     for (int i = 0; i < players->getPlayersNum(); i++)
     {
         std::cout << players->getPlayer(i)->getPlayerName() << "'s score: " << players->getPlayer(i)->getPlayerScore() << std::endl;
@@ -359,9 +358,9 @@ bagPtr Game::getBag()
     return this->bag;
 }
 
-bool Game::isAdvMode()
+bool Game::isSixTileMode()
 {
-    return this->advMode;
+    return this->sixTileMode;
 }
 
 bool Game::isGreyMode()
