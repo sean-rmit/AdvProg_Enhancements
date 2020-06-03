@@ -196,8 +196,8 @@ bool Game::playerMakesMove(int playerNum)
     {
         if (factoryNum == 0 || factoryNum == 1)
         {
-            // patternlineIndex = 6 is broken line
-            if (patternlineIndex == 6)
+            // total pattern lines + 1 is broken line
+            if (patternlineIndex == players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 1)
             {
                 validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(factoryNum), tileColour, lid, firstplayerTokenTaken);
             }
@@ -209,9 +209,9 @@ bool Game::playerMakesMove(int playerNum)
         }
         else
         {
-            // patternlineIndex = 6 is broken line
+            // total pattern lines + 1 is broken line
             // factoryNum - 2 to remove the 2 centres at the front
-            if (patternlineIndex == 6)
+            if (patternlineIndex == players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 1)
             {
                 validMove = players->getPlayer(playerNum)->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 2), tileColour, factories->getCentre(targetCentre), lid);
             }
@@ -227,8 +227,8 @@ bool Game::playerMakesMove(int playerNum)
     {
         if (factoryNum == 0)
         {
-            // patternlineIndex = 6 is broken line
-            if (patternlineIndex == 6)
+            // total pattern lines + 1 is broken line
+            if (patternlineIndex == players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 1)
             {
                 validMove = players->getPlayer(playerNum)->takeTilesFromCentreToBrokenLine(factories->getCentre(targetCentre), tileColour, lid, firstplayerTokenTaken);
             }
@@ -240,9 +240,9 @@ bool Game::playerMakesMove(int playerNum)
         }
         else
         {
-            // patternlineIndex = 6 is broken line
+            // total pattern lines + 1 is broken line
             // factoryNum - 1 to remove the 1 centre at the front
-            if (patternlineIndex == 6)
+            if (patternlineIndex == players->getPlayer(playerNum)->getPlayerMosaic()->getPlayerPatternLines()->getPatternLinesNum() + 1)
             {
                 validMove = players->getPlayer(playerNum)->takeTilesFromFactoryToBrokenLine(factories->getFactory(factoryNum - 1), tileColour, factories->getCentre(targetCentre), lid);
             }

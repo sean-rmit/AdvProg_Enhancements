@@ -11,7 +11,7 @@ void mainMenuPage(int seed)
     while (mainMenuRunning)
     {
         std::cout << "> ";
-        char input;
+        char input = ' ';
         std::cin >> input;
         if (input == 'C' || input == 'c')
         {
@@ -51,7 +51,7 @@ void mainMenuPage(int seed)
                     std::cout << "WARNING: You have entered an invalid value. Normal Mode will be chosen." << std::endl;
                 }
 
-                printGreyModePrompt();
+                printGreyModePrompt(sixTileMode);
                 std::cout << "> ";
                 std::cin >> input;
                 if (input == 'B' || input == 'b')
