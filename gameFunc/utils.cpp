@@ -71,9 +71,10 @@ void printInstructions(int numCentres)
     // else if (numCentres == 2) {
     //     std::cout << "Make a move: turn <Factory Tndex> <Tile Colour> <PatternLine Index> <Target Centre>" << std::endl;
     // }
-    std::cout << "Make a move: turn <Factory Tndex> <Tile Colour> <Patternline Index>" << std::endl;
-    std::cout << "Save the game: save" << std::endl;
-    std::cout << "Quit the game: quit" << std::endl;
+    std::cout << "Make a move: type 'turn <Factory Tndex> <Tile Colour> <Patternline Index>'" << std::endl;
+    std::cout << "Further assistance: type 'help'" << std::endl;
+    std::cout << "Save the game: type 'save'" << std::endl;
+    std::cout << "Quit the game: type 'quit'" << std::endl;
 }
 
 void printFactories(Factories *factories)
@@ -186,10 +187,12 @@ void printPlayerMosaics(Players *players, bool sixTileMode, bool greyMode)
 
 void printPlayerPoints(Players *players)
 {
+    std::cout << std::endl;
     for (int i = 0; i < players->getPlayersNum(); i++)
     {
         std::cout << players->getPlayer(i)->getPlayerName() << "'s score: " << players->getPlayer(i)->getPlayerScore() << std::endl;
     }
+    std::cout << std::endl;
 }
 
 void printGreyModeTiltingUI(Player *player, int patternLineIndex, bool instructions)
@@ -238,15 +241,20 @@ void printSixTileModePrompt()
     std::cout << "Play azul with the classic 5x5 mosaic wall." << std::endl;
     std::cout << std::endl;
     printSampleMosaicTemplate(false, false);
+    std::cout << std::endl;
     printString("=", 30);
     std::cout << std::endl;
     std::cout << "Option B: Six Tile Mode" << std::endl;
     printString("=", 30);
     std::cout << std::endl;
-    std::cout << "Play azul with a 6x6 mosaic wall, which includes the additional tile colour Orange" << std::endl;
+    std::cout << "Play azul with a 6x6 mosaic wall, which includes the additional tile colour ";
+    printf(ORANGE_TEXT);
+    std::cout << "Orange" << std::endl;
+    printf(RESET);
     std::cout << std::endl;
     printSampleMosaicTemplate(true, false);
-    std::cout << "Enter A(Normal) or B(Six Tile):" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Enter A(Classic Mode) or B(Six Tile Mode):" << std::endl;
 }
 
 void printSampleMosaicTemplate(bool sixTileMode, bool greyMode)
@@ -323,6 +331,7 @@ void printGreyModePrompt(bool sixTileMode)
     std::cout << "Play azul with a mosaic wall with fixed colour positions" << std::endl;
     std::cout << std::endl;
     printSampleMosaicTemplate(sixTileMode, false);
+    std::cout << std::endl;
     printString("=", 30);
     std::cout << std::endl;
     std::cout << "Option B: Grey Mode" << std::endl;
@@ -331,13 +340,16 @@ void printGreyModePrompt(bool sixTileMode)
     std::cout << "Play azul with an unfixed grey mosaic wall. Wall colour restrictions still apply. Design your own mosaic wall!" << std::endl;
     std::cout << std::endl;
     printSampleMosaicTemplate(sixTileMode, true);
-    std::cout << "Enter A(Fixed) or B(Grey):" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Enter A(Fixed Wall Mode) or B(Grey Mode):" << std::endl;
 }
 
 void printEndGameMessage(Players *players, bool sixTileMode, bool greyMode)
 {
     std::cout << "A player has completed a horizontal line on their wall, the game ends!" << std::endl;
+    std::cout << std::endl;
     printPlayerMosaics(players, sixTileMode, greyMode);
+    std::cout << std::endl;
 }
 
 void printLoadGameTitle() {
@@ -370,4 +382,107 @@ void printNewGameTitle() {
     printString("=", PAGEWIDTH);
     std::cout << std::endl;
     std::cout << std::endl;
+}
+
+void printHelpGuideMosaic() {
+    Line *line = new Line(4);
+    Line *line1 = new Line (4);
+    Line *line2 = new Line (2);
+    PatternLines *patternlines = new PatternLines(false);
+    line->addTileToBack(YELLOW);
+    line->addTileToBack(YELLOW);
+    line->addTileToBack(RED);
+    line->addTileToBack(DARKBLUE);
+    line1->addTileToBack(BLACK);
+    line1->addTileToBack(LIGHTBLUE);
+    line1->addTileToBack(BLACK);
+    line1->addTileToBack(YELLOW);
+    line2->addTileToBack(RED);
+    line2->addTileToBack(DARKBLUE);
+    patternlines->getLine(0)->addTileToBack(RED);
+    for (int i = 0; i < 3; i++) {
+        patternlines->getLine(3)->addTileToBack(LIGHTBLUE);
+        patternlines->getLine(4)->addTileToBack(BLACK);
+    }
+    
+    std::cout << "|BEFORE|";
+    printString(" ", 42);
+    std::cout << "|AFTER|" << std::endl;
+    std::cout << "Factories:";
+    printString(" ", 40);
+    std::cout << "Factories:" << std::endl;
+    printString("=", 20);
+    printString(" ", 30);
+    printString("=", 20);
+    std::cout << std::endl;
+    std::cout << "0 - Centre:";
+    printString(" ", 39);
+    std::cout << "0 - Centre:" << line2->getTilesAsString(false, true);
+    std::cout << " << Excess tiles from factory gets placed into centre" << std::endl;
+    std::cout << "1 - Factory:" << line->getTilesAsString(true, true);
+    for (int i = 0; i < line->size(); i++) {
+        line->removeTile(i);
+    }
+    std::cout << " << Factory chosen";
+    printString(" ", 16);
+    std::cout << "1 - Factory:" << line->getTilesAsString(true, true);
+    std::cout << " << All tiles removed from selected factory" << std::endl;
+    std::cout << "2 - Factory:" << line1->getTilesAsString(true, true);
+    printString(" ", 34);
+    std::cout << "2 - Factory:" << line1->getTilesAsString(true, true) << std::endl;
+    printString("=", 20);
+    printString(" ", 30);
+    printString("=", 20);
+    std::cout << std::endl;
+    std::cout << "Your pattern line:";
+    printString(" ", 32);
+    std::cout << "Your pattern line:" << std::endl;
+    for (int i = 0; i < patternlines->getPatternLinesNum(); i++) {
+        std::cout << i + 1 << ":";
+        printString(" ", 5 - i);
+        std::cout << patternlines->getLine(i)->getTilesAsString(true, true);
+        if (i + 1 == 3) {
+            std::cout << " << Pattern line chosen";
+            printString(" ", 19);
+            patternlines->getLine(i)->addTileToBack(YELLOW);
+            patternlines->getLine(i)->addTileToBack(YELLOW);
+        }
+        else {
+            printString(" ", 42);
+        }
+        std::cout << i + 1 << ":";
+        printString(" ", 5 - i);
+        std::cout << patternlines->getLine(i)->getTilesAsString(true, true);
+        if (i + 1 == 3) {
+            std::cout << " << 2 Y tiles from factory is moved here";
+        }
+        std::cout << std::endl;
+    }
+    delete line;
+    delete line1;
+    delete line2;
+    delete patternlines;
+}
+
+void printHelpGuide() {
+    printString("=", PAGEWIDTH);
+    std::cout << std::endl;
+    std::cout << "Guide:" << std::endl;
+    std::cout << "1. Choose a factory you would like to pick your tiles from." << std::endl;
+    std::cout << "2. Decide on the tile colour you would like to select from the factory chosen." << std::endl;
+    std::cout << "3. Choose a pattern line on your board to put your selected tiles in." << std::endl;
+    std::cout << "4. Type 'turn <factory index> <tile colour> <pattern line index>'" << std::endl;
+    std::cout << std::endl;
+    std::cout << "Sample move: 'turn 1 Y 3'" << std::endl;
+    std::cout << "Details:" << std::endl;
+    std::cout << "Factory index chosen: 1" << std::endl;
+    std::cout << "Tile Colour chosen: Y" << std::endl;
+    std::cout << "Pattern line index chosen: 3" << std::endl;
+    std::cout << std::endl;
+    printHelpGuideMosaic();
+    std::cout << std::endl;
+    std::cout << "Enter any value to continue the game:" << std::endl;
+    std::cout << ">";;
+    std::string input;
+    std::cin >> input;
 }

@@ -379,7 +379,6 @@ bool Player::takeTilesFromCentreToBrokenLine(Centre *centre, char colour, Lid *l
 
 void Player::moveTilesFromPatternLineToWall(Lid *lid, bool greyMode)
 {
-    std::cout << "DEBUG: greyMode=" << greyMode << std::endl;
     if (!greyMode)
     {
         for (int lineIndex = 0; lineIndex < playerMosaic->getPlayerPatternLines()->getPatternLinesNum(); lineIndex++)
@@ -413,6 +412,7 @@ void Player::moveTilesFromPatternLineToWall(Lid *lid, bool greyMode)
                     std::cout << "Wall Column:" << std::endl;
                     std::cout << ">";
                     std::cin >> wallColumnAsString;
+                    std::cout << std::endl;
                     if (std::cin.eof())
                     {
                         columnChosen = true;
@@ -423,6 +423,7 @@ void Player::moveTilesFromPatternLineToWall(Lid *lid, bool greyMode)
                         {
                             wallColumn = std::stoi(wallColumnAsString);
                             columnChosen = true;
+                            wallColumn--;
                         }
                         catch (std::invalid_argument const &e)
                         {
@@ -505,7 +506,7 @@ void Player::printGreyModeTiltingUI(int patternLineIndex, bool instructions)
     {
         std::cout << "=======================================" << std::endl;
         std::cout << "Wall Tilting Phase - Player: " << playerName << std::endl;
-        std::cout << "Choose the column index of your wall you would like to place your tile" << std::endl;
+        std::cout << "Choose the column index (1-" << playerMosaic->getPlayerWall()->getWallLinesNum() << ") of your wall you would like to place your tile" << std::endl;
         std::cout << "for the targeted line index with symbol '>>'" << std::endl;
         std::cout << "=======================================" << std::endl;
     }
@@ -517,7 +518,7 @@ void Player::printGreyModeTiltingUI(int patternLineIndex, bool instructions)
 
     for (int i = 0; i < playerMosaic->getPlayerWall()->getWallLinesNum(); i++)
     {
-        std::cout << i;
+        std::cout << i + 1;
     }
     std::cout << std::endl;
     for (int i = 0; i < playerMosaic->getPlayerPatternLines()->getPatternLinesNum(); i++)

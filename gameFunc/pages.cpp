@@ -76,12 +76,12 @@ void mainMenuPage(int seed)
                     std::cout << "You have entered an invalid value. Fixed Wall Mode will be chosen." << std::endl;
                 }
 
-                std::cout << "Number of players: " << std::endl;
+                std::cout << "Number of players, min: 2  max: 4" << std::endl;
                 int playersNum = 0;
                 std::string playersNumAsString;
                 std::cin >> playersNumAsString;
                 int centresNum = 0;
-                std::cout << "Number of centres: " << std::endl;
+                std::cout << "Number of centres, min: 1  max: 2 " << std::endl;
                 std::string centresNumAsString;
                 std::cin >> centresNumAsString;
                 if (std::cin.eof())
@@ -130,7 +130,8 @@ void mainMenuPage(int seed)
                     forcequit = true;
                 }
                 // check for B
-                if (filename == "B" || filename == "b") {
+                if (filename == "B" || filename == "b")
+                {
                     found = true;
                     back = true;
                 }
@@ -144,13 +145,16 @@ void mainMenuPage(int seed)
                     found = true;
                 }
             }
-            if (!forcequit && !back) {
+            if (!forcequit && !back)
+            {
                 loadGamePage(filename);
             }
-            if (back) {
+            if (back)
+            {
                 printMainMenuTemplate();
             }
-            else {
+            else
+            {
                 mainMenuRunning = false;
             }
         }
@@ -210,11 +214,11 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
             // loop until valid move is made
             while (!validMove)
             {
+                bool helpNeeded = false;
                 std::cout << game->getPlayers()->getPlayer(playerNum)->getPlayerName() << "'s turn to make a move:" << std::endl;
                 std::cout << "> ";
                 std::string playerMove;
                 std::cin >> playerMove;
-
                 // if Ctrl+D is entered terminate the while loops
                 if (std::cin.eof())
                 {
@@ -223,7 +227,6 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
                     gameOngoing = false;
                     game->finaliseGame();
                 }
-
                 if (playerMove == "save")
                 {
                     validMove = true;
@@ -252,11 +255,19 @@ void newGamePage(int playersNum, int centresNum, bool sixTileMode, bool greyMode
                         std::cout << "Turn Successful." << std::endl;
                     }
                 }
-                if (!validMove)
+                else if (playerMove == "help")
+                {
+                    helpNeeded = true;
+                    printHelpGuide();
+                    printFactories(game->getFactories());
+                    std::cout << std::endl;
+                    printPlayerMosaics(game->getPlayers(), sixTileMode, greyMode);
+                }
+                if (!validMove && !helpNeeded)
                 {
                     std::cout << "Invalid Move. Please try again." << std::endl;
-                    std::cout << "To make a move:" << std::endl;
-                    std::cout << "turn <factory index> <tile colour> <patternline index>" << std::endl;
+                    std::cout << "To make a move: turn <factory index> <tile colour> <patternline index>" << std::endl;
+                    std::cout << "Further assistance: type 'help'" << std::endl;
                 }
             }
             turnCounter++;
@@ -289,7 +300,6 @@ void loadGamePage(std::string filename)
     int centresNum = 0;
     LoadSave *load = new LoadSave();
     Game *game = load->loadFile(filename, turnCounter);
-    std::cout << "DEBUG: firstplayertokentaken=" << game->isFirstPlayerTokenTaken() << std::endl;
     playersNum = game->getPlayers()->getPlayersNum();
     centresNum = game->getFactories()->getCentresNum();
     std::cout << "=== Azul Game Successfully Loaded ===" << std::endl;
@@ -340,6 +350,7 @@ void loadGamePage(std::string filename)
             // loop until valid move is made
             while (!validMove)
             {
+                bool helpNeeded = false;
                 std::cout << game->getPlayers()->getPlayer(playerNum)->getPlayerName() << "'s turn to make a move:" << std::endl;
                 std::cout << "> ";
                 std::string playerMove;
@@ -382,7 +393,15 @@ void loadGamePage(std::string filename)
                         std::cout << "Turn Successful." << std::endl;
                     }
                 }
-                if (!validMove)
+                else if (playerMove == "help")
+                {
+                    helpNeeded = true;
+                    printHelpGuide();
+                    printFactories(game->getFactories());
+                    std::cout << std::endl;
+                    printPlayerMosaics(game->getPlayers(), game->isSixTileMode(), game->isGreyMode());
+                }
+                if (!validMove && !helpNeeded)
                 {
                     std::cout << "Invalid Move." << std::endl;
                     std::cout << "To make a move:" << std::endl;

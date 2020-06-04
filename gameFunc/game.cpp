@@ -300,10 +300,12 @@ void Game::finaliseGame()
     {
         players->getPlayer(i)->addEndGameBonusPoints();
     }
+    std::cout << "Scores:" << std::endl;
     for (int i = 0; i < players->getPlayersNum(); i++)
     {
         std::cout << players->getPlayer(i)->getPlayerName() << "'s score: " << players->getPlayer(i)->getPlayerScore() << std::endl;
     }
+    std::cout << std::endl;
 
     // A vector of players with highest score as there might be a tie
     std::vector<int> playerWithHighestScore;
@@ -326,9 +328,11 @@ void Game::finaliseGame()
     std::cout << "The following player(s) has won the game: " << std::endl;
     for (int i = 0; i < (int)playerWithHighestScore.size(); i++)
     {
-        std::cout << players->getPlayer(playerWithHighestScore.at(i))->getPlayerName() << std::endl;
+        std::cout << i + 1 << ". " << players->getPlayer(playerWithHighestScore.at(i))->getPlayerName() << std::endl;
     }
+    std::cout << std::endl;
     std::cout << "Congratulations!!!" << std::endl;
+    std::cout << std::endl;
 }
 
 // getters and setters

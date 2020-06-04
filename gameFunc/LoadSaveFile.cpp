@@ -127,7 +127,6 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
             try
             {
                 playersNum = std::stoi(data);
-                std::cout << "DEBUG: Number of players: " << playersNum << std::endl;
             }
             catch (std::invalid_argument const &e)
             {
@@ -152,7 +151,6 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
             }
         }
     }
-    std::cout << "DEBUG: createFactoriesAndPlayers(): " << playersNum << "," << centresNum << std::endl;
     game->createFactoriesAndPlayers(playersNum, centresNum, sixTileMode, greyMode);
 
     // Reading file in
@@ -279,7 +277,6 @@ gamePtr LoadSave::loadFile(std::string loadFile, int &currentPlayer)
                     }
                     if (data[k] == FIRSTPLAYER)
                     {
-                        std::cout << "game->setFirstPlayerTokenTaken(true);" << std::endl;
                         game->setFirstPlayerTokenTaken(true);
                     }
                 }

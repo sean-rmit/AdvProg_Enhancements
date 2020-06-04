@@ -24,5 +24,7 @@ void printEndGameMessage(Players *players, bool sixTileMode, bool greyMode);
 void printSampleMosaicTemplate(bool sixTileMode, bool greyMode);
 void printLoadGameTitle();
 void printNewGameTitle();
+void printHelpGuideMosaic();
+void printHelpGuide();
 
 #endif // UTILS_H

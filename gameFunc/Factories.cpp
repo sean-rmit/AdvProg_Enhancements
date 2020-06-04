@@ -4,7 +4,6 @@
 #include <exception>
 
 Factories::Factories(int numPlayers, int numCentres) {
-    std::cout << "DEBUG: Factories constructor: numPlayers=" << numPlayers << " numCentres=" << numCentres << std::endl;
     if (numPlayers == 2) {
         factoriesNum = FACTORIES_NUM_TWO_PLAYERS;
     }
