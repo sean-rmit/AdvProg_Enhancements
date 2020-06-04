@@ -35,12 +35,16 @@ void mainMenuPage(int seed)
                 std::cin >> input;
                 if (input == 'B' || input == 'b')
                 {
-                    std::cout << "Six Tile Mode chosen!" << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "== Six Tile Mode chosen! ==" << std::endl;
+                    std::cout << std::endl;
                     sixTileMode = true;
                 }
                 else if (input == 'A' || input == 'a')
                 {
-                    std::cout << "Normal Mode chosen!" << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "== Classic Mode chosen! ==" << std::endl;
+                    std::cout << std::endl;
                     sixTileMode = false;
                 }
                 else if (std::cin.eof())
@@ -50,7 +54,9 @@ void mainMenuPage(int seed)
                 }
                 else
                 {
-                    std::cout << "WARNING: You have entered an invalid value. Normal Mode will be chosen." << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "WARNING: You have entered an invalid value. Classic Mode will be chosen." << std::endl;
+                    std::cout << std::endl;
                 }
 
                 printGreyModePrompt(sixTileMode);
@@ -58,12 +64,16 @@ void mainMenuPage(int seed)
                 std::cin >> input;
                 if (input == 'B' || input == 'b')
                 {
-                    std::cout << "Grey Mode chosen!" << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "== Grey Mode chosen! ==" << std::endl;
+                    std::cout << std::endl;
                     greyMode = true;
                 }
                 else if (input == 'A' || input == 'a')
                 {
-                    std::cout << "Fixed Wall Mode chosen!" << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "== Fixed Wall Mode chosen! ==" << std::endl;
+                    std::cout << std::endl;
                     greyMode = false;
                 }
                 else if (std::cin.eof())
@@ -73,15 +83,19 @@ void mainMenuPage(int seed)
                 }
                 else
                 {
-                    std::cout << "You have entered an invalid value. Fixed Wall Mode will be chosen." << std::endl;
+                    std::cout << std::endl;
+                    std::cout << "WARNING: You have entered an invalid value. Fixed Wall Mode will be chosen." << std::endl;
+                    std::cout << std::endl;
                 }
 
                 std::cout << "Number of players, min: 2  max: 4" << std::endl;
+                std::cout << ">";
                 int playersNum = 0;
                 std::string playersNumAsString;
                 std::cin >> playersNumAsString;
                 int centresNum = 0;
                 std::cout << "Number of centres, min: 1  max: 2 " << std::endl;
+                std::cout << ">";
                 std::string centresNumAsString;
                 std::cin >> centresNumAsString;
                 if (std::cin.eof())

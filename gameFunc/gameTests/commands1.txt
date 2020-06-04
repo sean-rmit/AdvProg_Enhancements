@@ -1,5 +1,5 @@
 L
-gameTests/inputSaveFile1.txt
-turn 0 B 4
+gameTests/saveFile1.txt
+turn 0 Y 1
 save
-gameTests/actualSaveFile1.txt
+gameTests/resultSaveFile1.txt

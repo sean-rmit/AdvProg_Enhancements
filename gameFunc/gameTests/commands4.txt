@@ -1,0 +1,12 @@
+L
+gameTests/saveFile4.txt
+turn 0 Y 1
+turn 0 R 1
+1
+1
+1
+1
+2
+3
+save
+gameTests/resultSaveFile4.txt

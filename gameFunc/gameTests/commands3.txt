@@ -1,0 +1,5 @@
+L
+gameTests/saveFile3.txt
+turn 0 Y 1
+save
+gameTests/resultSaveFile3.txt
